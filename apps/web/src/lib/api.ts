@@ -114,15 +114,28 @@ export function formatNumber(
   });
 }
 
+/** Drop trailing zeros: 10.00 → "10", 1.20 → "1.2", 1.26 → "1.26" */
+function trimZeros(n: number, digits: number): string {
+  return String(Number(n.toFixed(digits)));
+}
+
+/** Compact USD for metrics: $1.26M, $6.1K, $42.5 — never forces .00 */
 export function formatUsd(n: number): string {
-  return `$${formatNumber(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return `$${trimZeros(n / 1_000_000, 2)}M`;
+  if (abs >= 1_000) return `$${trimZeros(n / 1_000, 1)}K`;
+  return `$${formatNumber(n, { maximumFractionDigits: 2 })}`;
 }
 
 export function formatApy(bps: number): string {
-  return `${formatNumber(bps / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+  return `${trimZeros(bps / 100, 2)}%`;
 }
 
+/** Compact supply for metrics: 10M, 1.2K, 850 */
 export function formatSupply(n: number): string {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return `${trimZeros(n / 1_000_000, 2)}M`;
+  if (abs >= 1_000) return `${trimZeros(n / 1_000, 1)}K`;
   return formatNumber(n, { maximumFractionDigits: 2 });
 }
 

@@ -66,7 +66,7 @@ const POWERED = [
     name: "DoraHacks",
     href: "https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail",
     src: "/brand/partners/dorahacks.svg",
-    srcDark: "/brand/partners/dorahacks-dark.png",
+    srcDark: "/brand/partners/dorahacks-dark.svg",
     invertOnDark: false,
     wide: true,
     blurb: "BUIDL CTC 2026 Fall",
@@ -131,9 +131,9 @@ export default function LandingPage() {
   const { theme } = useTheme();
   const darkSurface = theme !== "light";
   const [apy, setApy] = useState("8.42%");
-  const [tvl, setTvl] = useState("$1,260,000.00");
+  const [tvl, setTvl] = useState("$1.26M");
   const [nav, setNav] = useState("1.0048");
-  const [supply, setSupply] = useState("10,000,000");
+  const [supply, setSupply] = useState("10M");
   const [updatedAgo, setUpdatedAgo] = useState("just now");
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   useReveal();
@@ -181,7 +181,7 @@ export default function LandingPage() {
       rate: apy,
       bar: 100,
       hot: true,
-      icon: "/brand/pyvusd-mark.svg",
+      icon: "/brand/pyvusd-flat.png",
     },
     {
       name: "US Treasuries",
@@ -189,7 +189,7 @@ export default function LandingPage() {
       rate: "4.3%",
       bar: 51,
       hot: false,
-      icon: "/brand/pyusd-mark.svg",
+      icon: "/brand/pyusd-flat.png",
     },
     {
       name: "Fintech savings",
@@ -325,14 +325,14 @@ export default function LandingPage() {
           Deposit pyUSD, let Attestcoin-gated RWA coupons raise NAV, and redeem shares anytime at live
           price — no bridge trust required.
         </p>
-        <div className={styles.howNums}>
+        <div className={`${styles.howNums} reveal-stagger`}>
           {["1", "2", "3"].map((n) => (
-            <div key={n} className={styles.howNum}>
+            <div key={n} className={`${styles.howNum} reveal-item`} data-from="scale">
               {n}
             </div>
           ))}
         </div>
-        <div className={styles.howGrid}>
+        <div className={`${styles.howGrid} reveal-stagger`}>
           {[
             {
               t: "Mint pyvUSD",
@@ -349,8 +349,12 @@ export default function LandingPage() {
               d: "Burn pyvUSD for pyUSD at live NAV. Proven yield stays in the vault accounting.",
               img: "/brand/crystal/crystal-redeem.jpg",
             },
-          ].map((c) => (
-            <article key={c.t} className={styles.howCard}>
+          ].map((c, i) => (
+            <article
+              key={c.t}
+              className={`${styles.howCard} reveal-item`}
+              data-from={i === 0 ? "left" : i === 2 ? "right" : "scale"}
+            >
               <h3>{c.t}</h3>
               <p>{c.d}</p>
               <div className={styles.howArt}>
@@ -371,8 +375,8 @@ export default function LandingPage() {
             <i /> Live · updates {updatedAgo}
           </span>
         </div>
-        <div className={styles.enginesFlow}>
-          <div className={styles.engineStack}>
+        <div className={`${styles.enginesFlow} reveal-stagger`}>
+          <div className={`${styles.engineStack} reveal-item`} data-from="left">
             {[
               {
                 n: "01",
@@ -406,7 +410,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className={styles.engineMid} aria-hidden>
+          <div className={`${styles.engineMid} reveal-item`} data-from="scale" aria-hidden>
             <div className={styles.engineLines} />
             <div className={styles.engineNode}>
               <div className={styles.nodeGlyph}>&lt;/&gt;</div>
@@ -414,13 +418,13 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <aside className={styles.engineResult}>
+          <aside className={`${styles.engineResult} reveal-item`} data-from="right">
             <div className={styles.engineResultTop}>
               <Image
-                src="/brand/pyvusd-mark.svg"
+                src="/brand/pyvusd-flat.png"
                 alt=""
-                width={44}
-                height={44}
+                width={52}
+                height={52}
                 className={styles.engineCoin}
               />
               <div>
@@ -452,7 +456,7 @@ export default function LandingPage() {
         <h2 className={styles.h2Center}>
           Allocating across <em>real cashflow</em> markets
         </h2>
-        <div className={styles.marketGrid}>
+        <div className={`${styles.marketGrid} reveal-stagger`}>
           {[
             {
               t: "Treasuries",
@@ -469,8 +473,12 @@ export default function LandingPage() {
               d: "Emerging-market cashflows",
               img: "/brand/crystal/crystal-fx.jpg",
             },
-          ].map((m) => (
-            <article key={m.t} className={styles.marketCard}>
+          ].map((m, i) => (
+            <article
+              key={m.t}
+              className={`${styles.marketCard} reveal-item`}
+              data-from={i === 0 ? "left" : i === 2 ? "right" : "scale"}
+            >
               <div className={styles.marketArt}>
                 <Image src={m.img} alt="" width={640} height={360} />
               </div>
@@ -489,9 +497,16 @@ export default function LandingPage() {
           The vault executes on Creditcoin CC3 with Attestcoin proofs, aiming for Credit Labs CEIP
           after BUIDL CTC 2026 Fall.
         </p>
-        <div className={styles.poweredFeature}>
-          {POWERED.slice(0, 2).map((p) => (
-            <a key={p.name} href={p.href} target="_blank" rel="noreferrer" className={styles.poweredCard}>
+        <div className={`${styles.poweredFeature} reveal-stagger`}>
+          {POWERED.slice(0, 2).map((p, i) => (
+            <a
+              key={p.name}
+              href={p.href}
+              target="_blank"
+              rel="noreferrer"
+              className={`${styles.poweredCard} reveal-item`}
+              data-from={i === 0 ? "left" : "right"}
+            >
               <Image
                 src={partnerSrc(p)}
                 alt={p.name}
@@ -520,8 +535,8 @@ export default function LandingPage() {
 
       {/* TRANSPARENCY */}
       <section className={`${styles.section} reveal`} id="transparency">
-        <div className={styles.transparency}>
-          <div className={styles.transparencyCopy}>
+        <div className={`${styles.transparency} reveal-stagger`}>
+          <div className={`${styles.transparencyCopy} reveal-item`} data-from="left">
             <h2 className={styles.h2Light}>Transparency</h2>
             <p className={styles.leadLight}>
               Every coupon observation, Attestcoin proof, and NAV update can be inspected in the vault
@@ -534,14 +549,14 @@ export default function LandingPage() {
               </span>
             </Link>
           </div>
-          <div className={styles.transparencyCard}>
+          <div className={`${styles.transparencyCard} reveal-item`} data-from="right">
             <div className={styles.navLabel}>NAV per share</div>
             <div className={styles.navValueBig}>
               <Image
-                src="/brand/pyvusd-mark.svg"
+                src="/brand/pyvusd-flat.png"
                 alt=""
-                width={40}
-                height={40}
+                width={48}
+                height={48}
                 className={styles.navCoin}
               />
               <span className={styles.navValueText}>
@@ -566,9 +581,14 @@ export default function LandingPage() {
             coupon — {apy} promised target on {tvl} TVL from a {supply} pyUSD test supply.
           </p>
         </div>
-        <div className={styles.compareBars}>
-          {compareRows.map((row) => (
-            <div key={row.name} className={`${styles.compareBarRow} ${row.hot ? styles.compareBarHot : ""}`}>
+        <div className={`${styles.compareBars} reveal-stagger`}>
+          {compareRows.map((row, i) => (
+            <div
+              key={row.name}
+              className={`${styles.compareBarRow} ${row.hot ? styles.compareBarHot : ""} reveal-item`}
+              data-from="left"
+              style={{ ["--reveal-i" as string]: i }}
+            >
               <div className={styles.compareLeft}>
                 <div className={styles.compareIcon}>
                   <Image src={row.icon} alt="" width={28} height={28} />
@@ -595,8 +615,8 @@ export default function LandingPage() {
 
       {/* ASSET + ATTESTCOIN brief */}
       <section className={`${styles.section} reveal`} id="asset">
-        <div className={styles.assetGrid}>
-          <div className={styles.coinStage}>
+        <div className={`${styles.assetGrid} reveal-stagger`}>
+          <div className={`${styles.coinStage} reveal-item`} data-from="left">
             <div className={styles.coinGlow} aria-hidden />
             <div className={styles.coinPair}>
               <Image
@@ -619,7 +639,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className={styles.assetCopy}>
+          <div className={`${styles.assetCopy} reveal-item`} data-from="right">
             <h2 className={styles.assetTitle}>
               <span className={styles.assetSymbol}>pyvUSD</span>
               <span className={styles.assetSub}>ProofYield vault share</span>
@@ -673,7 +693,7 @@ export default function LandingPage() {
             — foreign-chain inclusion verified cryptographically on CC3.
           </p>
         </div>
-        <div className={styles.feature3}>
+        <div className={`${styles.feature3} reveal-stagger`}>
           {[
             {
               t: "No bridges. No oracles.",
@@ -687,8 +707,12 @@ export default function LandingPage() {
               t: "Built for RWA yield",
               d: "ProofYield gates every NAV increase on Sepolia→CC3 inclusion proofs.",
             },
-          ].map((f) => (
-            <article key={f.t} className={styles.featureCard}>
+          ].map((f, i) => (
+            <article
+              key={f.t}
+              className={`${styles.featureCard} reveal-item`}
+              data-from={i === 0 ? "left" : i === 2 ? "right" : "scale"}
+            >
               <h3>{f.t}</h3>
               <p>{f.d}</p>
             </article>

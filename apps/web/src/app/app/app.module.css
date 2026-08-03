@@ -288,6 +288,7 @@
   grid-template-columns: 1.5fr 0.75fr;
   gap: 36px;
   align-items: start;
+  animation: reveal-up 0.8s var(--ease) both;
 }
 
 .vaultInfo {
@@ -303,8 +304,11 @@
 }
 
 .vaultCoin {
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--line), 0 10px 28px color-mix(in srgb, var(--gold) 22%, transparent);
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 10px 24px color-mix(in srgb, var(--gold) 28%, transparent));
 }
 
 .vaultTitle {
@@ -337,7 +341,10 @@
 }
 
 .badge img {
-  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
 }
 
 .badgeMuted {
@@ -350,11 +357,35 @@
   gap: 14px;
 }
 
+.metricRow > .metric {
+  animation: reveal-scale 0.75s var(--ease) both;
+}
+
+.metricRow > .metric:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.metricRow > .metric:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.metricRow > .metric:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.metricRow > .metric:nth-child(4) {
+  animation-delay: 0.28s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metricRow > .metric {
+    animation: none;
+  }
+}
+
 .metric {
   padding: 22px 20px;
   border-radius: 16px;
-  background: var(--fill);
-  border: 1px solid var(--line);
+  background: var(--card-face);
+  border: var(--card-rim);
+  box-shadow: var(--card-inset);
 }
 
 .metricK {
@@ -385,9 +416,9 @@
 .trade,
 .panelWide {
   border-radius: 20px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  box-shadow: var(--card-shadow);
+  background: var(--card-face);
+  border: var(--card-rim);
+  box-shadow: var(--card-inset), var(--card-shadow);
 }
 
 .chartCard {
@@ -522,6 +553,7 @@
   position: sticky;
   top: 28px;
   padding: 10px;
+  animation: reveal-right 0.85s var(--ease) 0.12s both;
 }
 
 .tradeTabs {
@@ -562,7 +594,20 @@
 }
 
 .assetRow img {
-  border-radius: 50%;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.coinPyusd {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 4px 10px rgba(61, 139, 255, 0.35));
+}
+
+.coinPyvusd {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 4px 10px rgba(240, 193, 74, 0.35));
 }
 
 .amountLabel {
@@ -791,8 +836,9 @@
 .allocCard {
   padding: 0;
   overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--card-face);
+  border: var(--card-rim);
+  box-shadow: var(--card-inset), var(--card-shadow);
   min-height: 420px;
   display: flex;
   flex-direction: column;
@@ -862,14 +908,13 @@
 
 .allocCoin {
   position: absolute;
-  right: 14px;
-  bottom: 14px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  right: 12px;
+  bottom: 12px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
   z-index: 1;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45));
-  background: color-mix(in srgb, var(--bg) 45%, transparent);
 }
 
 .allocBody {

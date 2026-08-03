@@ -70,6 +70,6 @@ export const THEME_META: Record<
   { label: string; logo: "l01" | "l11" | "w01"; mark: "tile" | "ghost" }
 > = {
   dark: { label: "Dark", logo: "l01", mark: "tile" },
-  "dark-gold": { label: "Gold", logo: "l11", mark: "ghost" },
+  "dark-gold": { label: "Midnight", logo: "l11", mark: "ghost" },
   light: { label: "Light", logo: "w01", mark: "tile" },
 };

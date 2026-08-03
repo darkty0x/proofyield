@@ -54,7 +54,7 @@
   color: var(--blue, #3d8bff);
 }
 
-/* L11 — dark gold */
+/* L11 — dark gold / midnight */
 .l11 .proof {
   color: #fff;
 }
@@ -70,12 +70,13 @@
   color: var(--blue, #3d8bff);
 }
 
-.dd {
-  position: relative;
-  flex-shrink: 0;
-}
+/* —— F-style celestial theme cycle —— */
 
-.ddTrigger {
+.themeToggle {
+  --icon-fill: rgba(232, 238, 248, 0.78);
+  --icon-fill-hover: #fff;
+  --size: 2.35rem;
+
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -88,124 +89,211 @@
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
   transition:
     background-color 0.3s var(--ease, ease),
     border-color 0.3s var(--ease, ease),
     color 0.3s var(--ease, ease);
 }
 
-.ddTrigger:hover {
+.themeToggle:hover {
   background: var(--theme-toggle-bg-hover, rgba(255, 255, 255, 0.1));
 }
 
-.ddTrigger:focus-visible {
+.themeToggle:focus-visible {
   outline: 2px solid var(--theme-accent, #3d8bff);
   outline-offset: 2px;
 }
 
-/* Never allow a blank white chip on dark surfaces */
-:global(html[data-theme="dark"]) .ddTrigger,
-:global(html:not([data-theme])) .ddTrigger {
+:global(html[data-theme="dark"]) .themeToggle,
+:global(html:not([data-theme])) .themeToggle {
+  --icon-fill: rgba(232, 238, 248, 0.82);
+  --icon-fill-hover: #fff;
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.14);
   color: #e8eef8;
 }
 
-:global(html[data-theme="dark-gold"]) .ddTrigger {
+:global(html[data-theme="dark-gold"]) .themeToggle {
+  --icon-fill: var(--gold, #f0c14a);
+  --icon-fill-hover: var(--gold-bright, #ffe08a);
   background: rgba(240, 193, 74, 0.08);
   border-color: rgba(240, 193, 74, 0.28);
   color: #f7f1e4;
 }
 
-:global(html[data-theme="light"]) .ddTrigger {
+:global(html[data-theme="light"]) .themeToggle {
+  --icon-fill: #4a5565;
+  --icon-fill-hover: #101820;
   background: rgba(16, 24, 32, 0.04);
   border-color: rgba(16, 24, 32, 0.12);
   color: #101820;
 }
 
-.ddLabel {
-  min-width: 3.6em;
+.themeLabel {
+  min-width: 4.6em;
+  text-align: left;
 }
 
-.ddCaret {
-  opacity: 0.7;
-  flex-shrink: 0;
-}
-
-.ddIcon {
+.sunAndMoon {
   width: 18px;
   height: 18px;
-  display: grid;
-  place-items: center;
   flex-shrink: 0;
-  color: inherit;
+  stroke-linecap: round;
 }
 
-.ddIcon svg {
-  display: block;
+.sunAndMoon .sun,
+.sunAndMoon .moonCut,
+.sunAndMoon .sunBeams,
+.sunAndMoon .stars {
+  transform-origin: center center;
 }
 
-.ddMenu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 80;
-  min-width: 168px;
-  margin: 0;
-  padding: 6px;
-  list-style: none;
-  border-radius: 14px;
-  border: 1px solid var(--theme-line, rgba(255, 255, 255, 0.1));
-  background: var(--panel, #121a28);
-  box-shadow: var(--card-shadow, 0 12px 28px rgba(0, 0, 0, 0.28));
+.sunAndMoon .sun {
+  fill: var(--icon-fill);
 }
 
-:global(html[data-theme="light"]) .ddMenu {
-  background: #ffffff;
-  border-color: rgba(16, 24, 32, 0.1);
+.themeToggle:is(:hover, :focus-visible) .sunAndMoon .sun {
+  fill: var(--icon-fill-hover);
 }
 
-:global(html[data-theme="dark-gold"]) .ddMenu {
-  background: #17130b;
-  border-color: rgba(240, 193, 74, 0.18);
+.sunAndMoon .sunBeams {
+  stroke: var(--icon-fill);
+  stroke-width: 2px;
 }
 
-.ddOption {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 40px;
-  padding: 0 12px;
-  border-radius: 10px;
-  color: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: left;
-  transition: background-color 0.15s ease;
+.themeToggle:is(:hover, :focus-visible) .sunAndMoon .sunBeams {
+  stroke: var(--icon-fill-hover);
 }
 
-:global(html[data-theme="dark"]) .ddOption,
-:global(html:not([data-theme])) .ddOption {
-  color: #e8eef8;
+.sunAndMoon .stars {
+  opacity: 0;
+  fill: var(--icon-fill);
 }
 
-:global(html[data-theme="dark-gold"]) .ddOption {
-  color: #f7f1e4;
+.themeToggle:is(:hover, :focus-visible) .sunAndMoon .stars {
+  fill: var(--icon-fill-hover);
 }
 
-:global(html[data-theme="light"]) .ddOption {
-  color: #101820;
+/* Dark — crescent moon (F eclipse) */
+:global(html[data-theme="dark"]) .sunAndMoon .sun,
+:global(html:not([data-theme])) .sunAndMoon .sun {
+  transform: scale(1.75);
 }
 
-.ddOption:hover {
-  background: var(--fill, rgba(255, 255, 255, 0.06));
+:global(html[data-theme="dark"]) .sunAndMoon .sunBeams,
+:global(html:not([data-theme])) .sunAndMoon .sunBeams {
+  opacity: 0;
 }
 
-.ddOptionOn {
-  background: var(--fill-strong, rgba(61, 139, 255, 0.18));
+:global(html[data-theme="dark"]) .sunAndMoon .moonCut,
+:global(html:not([data-theme])) .sunAndMoon .moonCut {
+  transform: translateX(-7px);
 }
 
-.ddOption .ddIcon {
-  color: inherit;
+@supports (cx: 1px) {
+  :global(html[data-theme="dark"]) .sunAndMoon .moonCut,
+  :global(html:not([data-theme])) .sunAndMoon .moonCut {
+    transform: translateX(0);
+    cx: 17px;
+  }
+}
+
+/* Midnight — full gold moon + stars */
+:global(html[data-theme="dark-gold"]) .sunAndMoon .sun {
+  transform: scale(1.2);
+}
+
+:global(html[data-theme="dark-gold"]) .sunAndMoon .sunBeams {
+  opacity: 0;
+}
+
+:global(html[data-theme="dark-gold"]) .sunAndMoon .moonCut {
+  transform: translateX(12px);
+}
+
+@supports (cx: 1px) {
+  :global(html[data-theme="dark-gold"]) .sunAndMoon .moonCut {
+    transform: translateX(0);
+    cx: 36px;
+  }
+}
+
+:global(html[data-theme="dark-gold"]) .sunAndMoon .stars {
+  opacity: 1;
+}
+
+/* Light — sun + beams (default SVG geometry) */
+:global(html[data-theme="light"]) .sunAndMoon .sun {
+  transform: scale(1);
+}
+
+:global(html[data-theme="light"]) .sunAndMoon .sunBeams {
+  opacity: 1;
+}
+
+:global(html[data-theme="light"]) .sunAndMoon .moonCut {
+  transform: translateX(0);
+}
+
+@supports (cx: 1px) {
+  :global(html[data-theme="light"]) .sunAndMoon .moonCut {
+    cx: 24px;
+  }
+}
+
+:global(html[data-theme="light"]) .sunAndMoon .stars {
+  opacity: 0;
+}
+
+/* Motion — respect reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  .sunAndMoon .sun {
+    transition: transform 0.5s cubic-bezier(0.5, 1.25, 0.75, 1.25), fill 0.3s ease;
+  }
+
+  .sunAndMoon .sunBeams {
+    transition:
+      transform 0.5s cubic-bezier(0.5, 1.5, 0.75, 1.25),
+      opacity 0.45s ease,
+      stroke 0.3s ease;
+  }
+
+  .sunAndMoon .moonCut {
+    transition: transform 0.35s cubic-bezier(0, 0, 0, 1), cx 0.35s cubic-bezier(0, 0, 0, 1);
+  }
+
+  .sunAndMoon .stars {
+    transition: opacity 0.4s ease, fill 0.3s ease;
+  }
+
+  :global(html[data-theme="dark"]) .sunAndMoon .sun,
+  :global(html:not([data-theme])) .sunAndMoon .sun {
+    transition-timing-function: ease;
+    transition-duration: 0.25s;
+  }
+
+  :global(html[data-theme="dark"]) .sunAndMoon .sunBeams,
+  :global(html:not([data-theme])) .sunAndMoon .sunBeams {
+    transform: rotate(-25deg);
+    transition-duration: 0.15s;
+  }
+
+  :global(html[data-theme="dark"]) .sunAndMoon .moonCut,
+  :global(html:not([data-theme])) .sunAndMoon .moonCut {
+    transition-delay: 0.25s;
+    transition-duration: 0.5s;
+  }
+
+  :global(html[data-theme="dark-gold"]) .sunAndMoon .moonCut {
+    transition-delay: 0s;
+    transition-duration: 0.35s;
+  }
+
+  :global(html[data-theme="light"]) .sunAndMoon .sunBeams {
+    transform: rotate(0deg);
+  }
 }
