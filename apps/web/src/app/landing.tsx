@@ -180,8 +180,8 @@ export default function LandingPage() {
             <a href="#how">How it works</a>
             <a href="#engines">Strategy</a>
             <a href="#markets">Markets</a>
-            <a href="#compare">Yield</a>
             <a href="#powered">Infrastructure</a>
+            <a href="#compare">Yield</a>
           </nav>
           <div className={styles.navRight}>
             <ThemeToggle />
