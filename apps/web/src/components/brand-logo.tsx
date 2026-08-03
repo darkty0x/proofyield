@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { THEME_META, useTheme, type ThemeId } from "./theme";
 import styles from "./brand-logo.module.css";
 
@@ -46,7 +45,7 @@ export function BrandLogo({ href = "/", markSize = 30, className }: Props) {
 
 function MoonIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
         d="M21 14.3A8.5 8.5 0 0 1 9.7 3 7 7 0 1 0 21 14.3Z"
         fill="currentColor"
@@ -57,39 +56,28 @@ function MoonIcon() {
 
 function SunIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="4.2" fill="currentColor" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="4.4" fill="currentColor" />
       <path
-        d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.05 5.05l1.56 1.56M17.39 17.39l1.56 1.56M18.95 5.05l-1.56 1.56M6.61 17.39l-1.56 1.56"
+        d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M4.8 4.8l1.7 1.7M17.5 17.5l1.7 1.7M19.2 4.8l-1.7 1.7M6.5 17.5l-1.7 1.7"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinecap="round"
       />
     </svg>
   );
 }
 
-function GoldIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 2.8l1.7 5.2h5.5l-4.4 3.2 1.7 5.2L12 13.2 7.5 16.4l1.7-5.2-4.4-3.2h5.5L12 2.8z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-const ICONS: Record<ThemeId, { icon: () => ReactNode; label: string }> = {
-  dark: { icon: MoonIcon, label: "Dark" },
-  "dark-gold": { icon: GoldIcon, label: "Gold" },
-  light: { icon: SunIcon, label: "Light" },
-};
-
 const ORDER: ThemeId[] = ["dark", "dark-gold", "light"];
+const LABELS: Record<ThemeId, string> = {
+  dark: "Dark",
+  "dark-gold": "Gold",
+  light: "Light",
+};
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
+  const index = Math.max(0, ORDER.indexOf(theme));
 
   return (
     <div
@@ -97,24 +85,26 @@ export function ThemeToggle({ className }: { className?: string }) {
       role="group"
       aria-label="Color theme"
     >
-      {ORDER.map((id) => {
-        const item = ICONS[id];
-        const active = theme === id;
-        const Icon = item.icon;
-        return (
-          <button
-            key={id}
-            type="button"
-            className={`${styles.toggleBtn} ${active ? styles.toggleOn : ""}`}
-            onClick={() => setTheme(id)}
-            aria-label={`${item.label} theme`}
-            aria-pressed={active}
-            title={item.label}
-          >
-            <Icon />
-          </button>
-        );
-      })}
+      <span
+        className={styles.toggleThumb}
+        style={{ transform: `translateX(${index * 100}%)` }}
+        aria-hidden
+      />
+      {ORDER.map((id) => (
+        <button
+          key={id}
+          type="button"
+          className={`${styles.toggleBtn} ${theme === id ? styles.toggleOn : ""}`}
+          onClick={() => setTheme(id)}
+          aria-label={`${LABELS[id]} theme`}
+          aria-pressed={theme === id}
+          title={LABELS[id]}
+        >
+          {id === "dark" ? <MoonIcon /> : null}
+          {id === "light" ? <SunIcon /> : null}
+          {/* gold = middle slot, no icon */}
+        </button>
+      ))}
     </div>
   );
 }

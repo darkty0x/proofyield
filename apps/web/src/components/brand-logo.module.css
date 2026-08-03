@@ -71,47 +71,61 @@
 }
 
 .toggleGroup {
-  display: inline-flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
   align-items: center;
-  gap: 2px;
-  padding: 3px;
+  padding: 4px;
   border-radius: 999px;
   border: 1px solid var(--theme-toggle-border, rgba(255, 255, 255, 0.14));
   background: var(--theme-toggle-bg, rgba(255, 255, 255, 0.06));
   transition:
-    background-color 0.4s var(--ease, ease),
-    border-color 0.4s var(--ease, ease);
+    background-color 0.45s var(--ease, ease),
+    border-color 0.45s var(--ease, ease);
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--theme-toggle-active-bg, #3d8bff);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.4s var(--ease, ease),
+    background-color 0.45s var(--ease, ease);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .toggleBtn {
-  width: 32px;
-  height: 32px;
+  position: relative;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   border-radius: 999px;
   color: var(--theme-toggle-fg, rgba(255, 255, 255, 0.65));
-  transition:
-    color 0.3s var(--ease, ease),
-    background-color 0.35s var(--ease, ease),
-    transform 0.25s var(--ease, ease);
+  transition: color 0.35s var(--ease, ease);
 }
 
 .toggleBtn:hover {
   color: var(--theme-toggle-fg-hover, #fff);
-  background: var(--theme-toggle-bg-hover, rgba(255, 255, 255, 0.1));
 }
 
 .toggleOn {
-  color: var(--theme-toggle-active-fg, #070b12);
-  background: var(--theme-toggle-active-bg, #fff);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+  color: var(--theme-toggle-active-fg, #fff);
 }
 
 .toggleOn:hover {
-  color: var(--theme-toggle-active-fg, #070b12);
-  background: var(--theme-toggle-active-bg, #fff);
+  color: var(--theme-toggle-active-fg, #fff);
 }
 
 .toggleBtn svg {
   display: block;
+  width: 20px;
+  height: 20px;
 }
