@@ -36,6 +36,18 @@ function shortAddr(addr: string) {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
+function isUserRejection(err: unknown): boolean {
+  const code = (err as { code?: number })?.code;
+  if (code === 4001 || code === 4900) return true;
+  const msg = (err instanceof Error ? err.message : String(err ?? "")).toLowerCase();
+  return (
+    msg.includes("user rejected") ||
+    msg.includes("user denied") ||
+    msg.includes("connection rejected") ||
+    msg.includes("rejected the request")
+  );
+}
+
 export function useWallet() {
   const [address, setAddress] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
@@ -88,7 +100,12 @@ export function useWallet() {
       const chain = (await window.ethereum.request({ method: "eth_chainId" })) as string;
       setChainId(parseInt(chain, 16));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Connection rejected");
+      // User closing / rejecting the wallet prompt is normal — not an error.
+      if (isUserRejection(err)) {
+        setError(null);
+      } else {
+        setError(err instanceof Error ? err.message : "Could not connect wallet");
+      }
     } finally {
       setConnecting(false);
     }
@@ -113,6 +130,8 @@ export function useWallet() {
           method: "wallet_addEthereumChain",
           params: [CC3_PARAMS],
         });
+      } else if (isUserRejection(err)) {
+        setError(null);
       } else {
         setError(err instanceof Error ? err.message : "Network switch failed");
       }
