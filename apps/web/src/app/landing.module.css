@@ -357,7 +357,7 @@
   background:
     linear-gradient(165deg, #ffffff 0%, #f4f8ff 100%);
   border: 1px solid rgba(255, 255, 255, 0.9);
-  color: var(--ink);
+  color: #101820;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -378,7 +378,9 @@
   right: 0;
   bottom: 8px;
   z-index: 2;
-  background: var(--surface);
+  background: linear-gradient(165deg, #101820 0%, #182536 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f4f7fb;
   box-shadow:
     0 0 0 1px rgba(16, 24, 32, 0.04),
     0 32px 56px rgba(2, 6, 23, 0.34),
@@ -413,7 +415,7 @@
 }
 
 .statPillDark {
-  background: var(--ink);
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
 }
 
@@ -423,7 +425,11 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--muted);
+  color: #5a6b7d;
+}
+
+.statCardTvl .statLive {
+  color: rgba(244, 247, 251, 0.7);
 }
 
 .statLive i {
@@ -442,6 +448,7 @@
   line-height: 0.98;
   letter-spacing: -0.045em;
   animation: tick-up 0.8s var(--ease) both;
+  color: inherit;
 }
 
 .statLabelRow {
@@ -457,21 +464,29 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: #2c3a4d;
+}
+
+.statCardTvl .statLabel {
+  color: rgba(244, 247, 251, 0.78);
 }
 
 .statHint {
   font-size: 12px;
   font-weight: 500;
-  color: var(--muted);
+  color: #5a6b7d;
   text-align: right;
+}
+
+.statCardTvl .statHint {
+  color: rgba(244, 247, 251, 0.55);
 }
 
 .statBar {
   margin-top: 16px;
   height: 6px;
   border-radius: 999px;
-  background: rgba(16, 24, 32, 0.06);
+  background: rgba(16, 24, 32, 0.08);
   overflow: hidden;
 }
 
@@ -780,7 +795,9 @@
   padding: 32px 28px;
   border-radius: 20px;
   background: var(--surface);
+  color: var(--ink);
   box-shadow: 0 12px 36px rgba(16, 24, 32, 0.05);
+  border: 1px solid var(--line);
   text-align: left;
   transition: transform 0.25s var(--ease);
 }
@@ -795,6 +812,7 @@
   max-width: 260px;
   object-fit: contain;
   object-position: left center;
+  color: var(--ink);
 }
 
 .poweredStrip {
@@ -805,13 +823,15 @@
   gap: 36px 48px;
   width: 100%;
   padding: 12px 0 4px;
+  color: var(--ink);
 }
 
 .stripItem {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.9;
+  color: var(--ink);
+  opacity: 0.95;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
@@ -825,6 +845,13 @@
   height: 44px !important;
   max-width: 200px;
   object-fit: contain;
+  color: var(--ink);
+}
+
+/* Raster wordmarks are dark — invert on dark surfaces */
+html[data-theme="dark"] .logoRaster,
+html[data-theme="dark-gold"] .logoRaster {
+  filter: brightness(0) invert(1);
 }
 
 @keyframes marquee {
@@ -1191,8 +1218,8 @@
   height: 48px;
   padding: 0 24px;
   border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
+  background: var(--submit-bg, #2f78f0);
+  color: var(--submit-fg, #fff);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -1205,7 +1232,8 @@
   height: 48px;
   padding: 0 24px;
   border-radius: 999px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--ink) 28%, transparent);
+  color: var(--ink);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -1897,7 +1925,7 @@
 .compareIcon img {
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: 8px;
   display: block;
 }
 
@@ -1906,11 +1934,8 @@
   box-shadow: inset 0 0 0 1px rgba(240, 193, 74, 0.35);
 }
 
-.compareIcon span {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  background: var(--line);
+.compareBarHot .compareIcon img {
+  border-radius: 50%;
 }
 
 .compareTags {
@@ -1933,7 +1958,7 @@
 .barViz {
   height: 10px;
   border-radius: 999px;
-  background: #e8edf5;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
   overflow: hidden;
 }
 
