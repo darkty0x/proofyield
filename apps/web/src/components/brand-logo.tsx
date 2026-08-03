@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { THEME_META, useTheme, type ThemeId } from "./theme";
 import styles from "./brand-logo.module.css";
 
@@ -48,12 +48,48 @@ export function BrandLogo({ href = "/", markSize = 30, className, onDark }: Prop
   return <div className={`${styles.lock} ${className ?? ""}`}>{inner}</div>;
 }
 
+function MoonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M21 14.3A8.5 8.5 0 0 1 9.7 3 7 7 0 1 0 21 14.3Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function GoldIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 2.6l1.85 5.7h6l-4.85 3.52 1.85 5.7L12 14.9 7.15 17.52l1.85-5.7L4.15 8.3h6L12 2.6z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function SunIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="4.2" fill="currentColor" />
+      <path
+        d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5 5l1.55 1.55M17.45 17.45 19 19M19 5l-1.55 1.55M6.55 17.45 5 19"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 const ORDER: ThemeId[] = ["dark", "dark-gold", "light"];
 
-const SWATCH: Record<ThemeId, string> = {
-  dark: "#3d8bff",
-  "dark-gold": "#f0c14a",
-  light: "#e8ecf2",
+const ICONS: Record<ThemeId, () => ReactNode> = {
+  dark: MoonIcon,
+  "dark-gold": GoldIcon,
+  light: SunIcon,
 };
 
 export function ThemeToggle({ className }: { className?: string }) {
@@ -61,6 +97,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const listId = useId();
+  const ActiveIcon = ICONS[theme];
 
   useEffect(() => {
     if (!open) return;
@@ -89,13 +126,21 @@ export function ThemeToggle({ className }: { className?: string }) {
         onClick={() => setOpen((v) => !v)}
       >
         <span
-          className={`${styles.ddSwatch} ${theme === "light" ? styles.ddSwatchLight : ""}`}
-          style={{ background: SWATCH[theme] }}
+          className={`${styles.ddIcon} ${theme === "dark-gold" ? styles.ddIconGold : ""}`}
           aria-hidden
-        />
+        >
+          <ActiveIcon />
+        </span>
         <span className={styles.ddLabel}>{THEME_META[theme].label}</span>
         <svg className={styles.ddCaret} width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-          <path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M2.5 4.5L6 8l3.5-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
 
@@ -103,6 +148,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         <ul id={listId} className={styles.ddMenu} role="listbox" aria-label="Color theme">
           {ORDER.map((id) => {
             const active = theme === id;
+            const Icon = ICONS[id];
             return (
               <li key={id} role="option" aria-selected={active}>
                 <button
@@ -114,10 +160,11 @@ export function ThemeToggle({ className }: { className?: string }) {
                   }}
                 >
                   <span
-                    className={`${styles.ddSwatch} ${id === "light" ? styles.ddSwatchLight : ""}`}
-                    style={{ background: SWATCH[id] }}
+                    className={`${styles.ddIcon} ${id === "dark-gold" ? styles.ddIconGold : ""}`}
                     aria-hidden
-                  />
+                  >
+                    <Icon />
+                  </span>
                   <span>{THEME_META[id].label}</span>
                 </button>
               </li>
