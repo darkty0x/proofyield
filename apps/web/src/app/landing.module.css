@@ -1226,7 +1226,7 @@
 .footer {
   margin-top: 80px;
   background: var(--footer-bg);
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(232, 238, 248, 0.78);
 }
 
 .footerInner {
@@ -1260,7 +1260,7 @@
 .footerTag {
   font-size: 15px;
   line-height: 1.55;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(232, 238, 248, 0.62);
 }
 
 .footerCols {
@@ -1274,7 +1274,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(232, 238, 248, 0.48);
   margin-bottom: 16px;
 }
 
@@ -1284,7 +1284,7 @@
   gap: 12px;
   font-size: 15px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(232, 238, 248, 0.82);
 }
 
 .footerColLinks a {
@@ -1299,13 +1299,13 @@
   max-width: 1120px;
   margin: 0 auto;
   padding: 22px 32px 40px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 10px 24px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(232, 238, 248, 0.5);
 }
 
 /* —— Atoma-style blocks —— */
