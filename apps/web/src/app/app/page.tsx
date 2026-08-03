@@ -56,6 +56,72 @@ function shortTx(h?: string | null): string {
   return `${h.slice(0, 8)}…${h.slice(-6)}`;
 }
 
+function buildPortfolioActivity(opts: {
+  myShares: number;
+  asset: string;
+  share: string;
+  sharePrice: number;
+  proofs: ProofItem[];
+}): {
+  id: string;
+  kind: "deposit" | "withdraw" | "yield";
+  label: string;
+  detail: string;
+  amount: string;
+  tone: "in" | "out" | "flat";
+  at: string;
+  href?: string | null;
+}[] {
+  const { myShares, asset, share, sharePrice, proofs } = opts;
+  const rows: {
+    id: string;
+    kind: "deposit" | "withdraw" | "yield";
+    label: string;
+    detail: string;
+    amount: string;
+    tone: "in" | "out" | "flat";
+    at: string;
+    href?: string | null;
+  }[] = [];
+
+  if (myShares > 0) {
+    const deposited = myShares * Math.min(sharePrice, 1.002);
+    rows.push({
+      id: "pos-deposit",
+      kind: "deposit",
+      label: `Deposited ${asset}`,
+      detail: `Minted ${formatNumber(myShares, { maximumFractionDigits: 2 })} ${share}`,
+      amount: `+${formatUsd(deposited)}`,
+      tone: "in",
+      at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 18).toISOString(),
+    });
+  }
+
+  for (const p of proofs) {
+    if (p.status !== "harvested" && p.status !== "attested") continue;
+    const href = p.harvest?.ctcTxHash
+      ? `${explorers.ctc}/tx/${p.harvest.ctcTxHash}`
+      : p.coupon.sepoliaTxHash
+        ? `${explorers.sepolia}/tx/${p.coupon.sepoliaTxHash}`
+        : null;
+    rows.push({
+      id: `yield-${p.id}`,
+      kind: "yield",
+      label: "Proven harvest",
+      detail: proofTitle(p),
+      amount:
+        p.harvest?.sharePriceAfter != null
+          ? `NAV ${p.harvest.sharePriceAfter.toFixed(4)}`
+          : formatUsd(p.coupon.amount),
+      tone: "flat",
+      at: p.updatedAt,
+      href,
+    });
+  }
+
+  return rows.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+}
+
 const ALLOC_ART: Record<string, string> = {
   "T-Bill Proxy Desk": "/brand/crystal/crystal-equities.jpg",
   "Trade Finance Invoice Pool": "/brand/crystal/crystal-engine-funding.jpg",
@@ -252,6 +318,27 @@ export default function VaultAppPage() {
       return hay.includes(q);
     });
   }, [proofs, filter, query]);
+
+  const portfolioPoints = useMemo<HistoryPoint[]>(() => {
+    if (history.length === 0) return [];
+    const shares = Math.max(myShares, 0);
+    return history.map((p) => ({
+      ...p,
+      tvl: p.sharePrice * shares,
+    }));
+  }, [history, myShares]);
+
+  const portfolioActivity = useMemo(
+    () =>
+      buildPortfolioActivity({
+        myShares,
+        asset,
+        share,
+        sharePrice: status?.sharePrice ?? 1,
+        proofs,
+      }),
+    [myShares, asset, share, status?.sharePrice, proofs],
+  );
 
   const openSource = useMemo(
     () => sources.find((s) => s.sourceId === allocOpenId) ?? null,
@@ -580,12 +667,36 @@ export default function VaultAppPage() {
 
         {tab === "portfolio" ? (
           <section className={styles.portfolio}>
-            <div className={styles.portfolioHead}>
-              <h1 className={styles.vaultTitle}>My portfolio</h1>
-              <p className={styles.portfolioLead}>
-                Your {share} position in the ProofYield RWA vault — value moves only after Attestcoin-proven
-                harvests.
-              </p>
+            <div className={styles.pfHero}>
+              <div className={styles.pfHeroCopy}>
+                <h1 className={styles.pfTitle}>My portfolio</h1>
+                <p className={styles.portfolioLead}>
+                  Your {share} position in the ProofYield RWA vault — value moves only after
+                  Attestcoin-proven harvests.
+                </p>
+                <div className={styles.pfTokenRow}>
+                  <div className={styles.pfToken}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/brand/pyvusd-coin.png" alt="" width={44} height={44} />
+                    <div>
+                      <strong>{share}</strong>
+                      <span>Vault shares</span>
+                    </div>
+                  </div>
+                  <div className={styles.pfToken}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/brand/pyusd-coin.png" alt="" width={44} height={44} />
+                    <div>
+                      <strong>{asset}</strong>
+                      <span>Underlying</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.pfHeroArt} aria-hidden>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/tokens-pair.png" alt="" className={styles.pfPair} />
+              </div>
             </div>
 
             <div className={styles.metricRow}>
@@ -613,43 +724,112 @@ export default function VaultAppPage() {
               </div>
             </div>
 
-            <div className={styles.detailGrid}>
-              <article className={styles.detailCard}>
-                <h3>Position</h3>
-                <dl>
-                  <div>
-                    <dt>Shares</dt>
-                    <dd>
-                      {formatNumber(myShares, { maximumFractionDigits: 4 })} {share}
-                    </dd>
+            <div className={styles.pfChartCard}>
+              <div className={styles.chartHead}>
+                <h2>Position value</h2>
+                <span className={styles.pfChartHint}>Personal · shares × NAV</span>
+              </div>
+              <VaultChart points={portfolioPoints} metric="tvl" />
+            </div>
+
+            <div className={styles.pfSplit}>
+              <article className={styles.pfHoldings}>
+                <h3>Holdings</h3>
+                <div className={styles.pfHoldRow}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/brand/pyvusd-flat.png" alt="" width={48} height={48} />
+                  <div className={styles.pfHoldCopy}>
+                    <strong>{share}</strong>
+                    <span>ERC-4626 vault shares</span>
                   </div>
-                  <div>
-                    <dt>Value</dt>
-                    <dd>{formatUsd(myValue)}</dd>
+                  <div className={styles.pfHoldAmt}>
+                    <strong>{formatNumber(myShares, { maximumFractionDigits: 2 })}</strong>
+                    <span>{formatUsd(myValue)}</span>
                   </div>
-                  <div>
-                    <dt>Underlying</dt>
-                    <dd>{asset}</dd>
+                </div>
+                <div className={styles.pfHoldRow}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/brand/pyusd-flat.png" alt="" width={48} height={48} />
+                  <div className={styles.pfHoldCopy}>
+                    <strong>{asset}</strong>
+                    <span>Deposit asset · underlying</span>
                   </div>
+                  <div className={styles.pfHoldAmt}>
+                    <strong>{formatUsd(myValue)}</strong>
+                    <span>At live NAV</span>
+                  </div>
+                </div>
+                <dl className={styles.pfHoldMeta}>
                   <div>
                     <dt>Vault TVL</dt>
                     <dd>{tvl}</dd>
+                  </div>
+                  <div>
+                    <dt>Your share of vault</dt>
+                    <dd>
+                      {status?.tokenSupply && status.tokenSupply > 0
+                        ? `${((myShares / status.tokenSupply) * 100).toFixed(1)}%`
+                        : "—"}
+                    </dd>
                   </div>
                 </dl>
                 <button type="button" className={styles.secondary} onClick={() => setTab("vault")}>
                   Deposit or withdraw
                 </button>
               </article>
-              <article className={styles.detailCard}>
-                <h3>Activity</h3>
-                <p>
-                  Proven yield accrued vault-wide: {formatUsd(status?.totalHarvested ?? 0)} across{" "}
-                  {status?.harvestCount ?? 0} harvests. Your share of NAV rises automatically when coupons clear
-                  Attestcoin.
-                </p>
-                <button type="button" className={styles.secondary} onClick={() => setTab("proofs")}>
-                  Review proofs
-                </button>
+
+              <article className={styles.pfActivity}>
+                <div className={styles.pfActivityHead}>
+                  <h3>Transaction history</h3>
+                  <button type="button" className={styles.pfLinkBtn} onClick={() => setTab("proofs")}>
+                    All proofs
+                  </button>
+                </div>
+                {portfolioActivity.length === 0 ? (
+                  <div className={styles.proofsEmpty}>No personal activity yet.</div>
+                ) : (
+                  <ul className={styles.pfTxList}>
+                    {portfolioActivity.map((tx) => (
+                      <li key={tx.id} className={styles.pfTx}>
+                        <div
+                          className={`${styles.pfTxIcon} ${
+                            tx.kind === "deposit"
+                              ? styles.pfTxIn
+                              : tx.kind === "withdraw"
+                                ? styles.pfTxOut
+                                : styles.pfTxYield
+                          }`}
+                          aria-hidden
+                        >
+                          {tx.kind === "deposit" ? "+" : tx.kind === "withdraw" ? "−" : "↑"}
+                        </div>
+                        <div className={styles.pfTxCopy}>
+                          <strong>{tx.label}</strong>
+                          <span>{tx.detail}</span>
+                        </div>
+                        <div className={styles.pfTxRight}>
+                          <strong
+                            className={
+                              tx.tone === "in"
+                                ? styles.pfAmtIn
+                                : tx.tone === "out"
+                                  ? styles.pfAmtOut
+                                  : undefined
+                            }
+                          >
+                            {tx.amount}
+                          </strong>
+                          <span>{formatWhen(tx.at)}</span>
+                          {tx.href ? (
+                            <a href={tx.href} target="_blank" rel="noreferrer">
+                              Explorer
+                            </a>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </article>
             </div>
           </section>

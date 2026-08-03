@@ -1208,7 +1208,29 @@
 .portfolio {
   display: flex;
   flex-direction: column;
+  gap: 24px;
+}
+
+.pfHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(220px, 0.9fr);
   gap: 28px;
+  align-items: center;
+  padding: 8px 4px 4px;
+}
+
+.pfHeroCopy {
+  min-width: 0;
+}
+
+.pfTitle {
+  margin: 0;
+  font-family: var(--font-display), Outfit, sans-serif;
+  font-size: clamp(30px, 3.4vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--ink);
 }
 
 .portfolioHead {
@@ -1216,11 +1238,336 @@
 }
 
 .portfolioLead {
-  margin-top: 10px;
-  font-size: 16px;
+  margin: 10px 0 0;
+  max-width: 46ch;
+  font-size: 15px;
   line-height: 1.55;
   color: var(--muted);
   font-weight: 500;
+}
+
+.pfTokenRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pfToken {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 168px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--card-face, var(--fill));
+}
+
+.pfToken img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.28));
+}
+
+.pfToken strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pfToken span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pfHeroArt {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, color-mix(in srgb, var(--blue, #3d8bff) 22%, transparent), transparent 70%),
+    var(--card-face);
+  border: var(--card-rim);
+  box-shadow: var(--card-inset), var(--card-shadow);
+  overflow: hidden;
+}
+
+:global(html[data-theme="dark-gold"]) .pfHeroArt {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, color-mix(in srgb, var(--gold, #f0c14a) 20%, transparent), transparent 70%),
+    var(--card-face);
+}
+
+.pfPair {
+  width: min(100%, 340px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.35));
+  transform: translateY(6px);
+}
+
+.pfChartCard {
+  padding: 24px 24px 16px;
+  border-radius: 20px;
+  background: var(--card-face);
+  border: var(--card-rim);
+  box-shadow: var(--card-inset), var(--card-shadow);
+}
+
+.pfChartHint {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pfSplit {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 20px;
+}
+
+.pfHoldings,
+.pfActivity {
+  padding: 24px;
+  border-radius: 20px;
+  background: var(--card-face);
+  border: var(--card-rim);
+  box-shadow: var(--card-inset), var(--card-shadow);
+}
+
+.pfHoldings h3,
+.pfActivity h3 {
+  margin: 0 0 18px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pfHoldRow {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.pfHoldRow img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.25));
+}
+
+.pfHoldCopy strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pfHoldCopy span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pfHoldAmt {
+  text-align: right;
+}
+
+.pfHoldAmt strong {
+  display: block;
+  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.pfHoldAmt span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pfHoldMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 18px 0 8px;
+}
+
+.pfHoldMeta dt {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pfHoldMeta dd {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.pfActivityHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.pfActivityHead h3 {
+  margin: 0;
+}
+
+.pfLinkBtn {
+  border: 0;
+  background: transparent;
+  color: var(--blue, #3d8bff);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+}
+
+:global(html[data-theme="dark-gold"]) .pfLinkBtn {
+  color: var(--gold, #f0c14a);
+}
+
+.pfTxList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pfTx {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.pfTx:last-child {
+  border-bottom: 0;
+}
+
+.pfTxIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--fill);
+  color: var(--ink);
+}
+
+.pfTxIn {
+  background: color-mix(in srgb, #3ecf8e 18%, transparent);
+  color: #3ecf8e;
+}
+
+.pfTxOut {
+  background: color-mix(in srgb, #e85d5d 18%, transparent);
+  color: #e85d5d;
+}
+
+.pfTxYield {
+  background: color-mix(in srgb, var(--blue, #3d8bff) 18%, transparent);
+  color: var(--blue, #3d8bff);
+}
+
+:global(html[data-theme="dark-gold"]) .pfTxYield {
+  background: color-mix(in srgb, var(--gold, #f0c14a) 18%, transparent);
+  color: var(--gold, #f0c14a);
+}
+
+.pfTxCopy strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pfTxCopy span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 28ch;
+}
+
+.pfTxRight {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.pfTxRight strong {
+  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.pfTxRight span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.pfTxRight a {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue, #3d8bff);
+  text-decoration: none;
+}
+
+:global(html[data-theme="dark-gold"]) .pfTxRight a {
+  color: var(--gold, #f0c14a);
+}
+
+.pfAmtIn {
+  color: #3ecf8e !important;
+}
+
+.pfAmtOut {
+  color: #e85d5d !important;
+}
+
+@media (max-width: 980px) {
+  .pfHero,
+  .pfSplit {
+    grid-template-columns: 1fr;
+  }
+
+  .pfHeroArt {
+    min-height: 180px;
+    order: -1;
+  }
 }
 
 .allocMedia {
