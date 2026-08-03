@@ -48,11 +48,11 @@ export function BrandLogo({ href = "/", markSize = 30, className, onDark }: Prop
   return <div className={`${styles.lock} ${className ?? ""}`}>{inner}</div>;
 }
 
-/** Material Design Icons (Iconify @iconify-json/mdi) — moon phases */
+/** Material Design Icons (Iconify @iconify-json/mdi) — moon phases, outline so Dark isn't a solid white blob */
 function FullMoonIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path fill="currentColor" d="M12 2A10 10 0 1 1 2 12A10 10 0 0 1 12 2" />
+      <circle cx="12" cy="12" r="8.25" stroke="currentColor" strokeWidth="1.75" />
     </svg>
   );
 }
@@ -60,7 +60,13 @@ function FullMoonIcon() {
 function HalfMoonIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path fill="currentColor" d="M12 2v20a10 10 0 0 0 0-20" />
+      <path
+        d="M12 3.75a8.25 8.25 0 1 0 0 16.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <path d="M12 3.75v16.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
   );
 }
@@ -68,7 +74,12 @@ function HalfMoonIcon() {
 function SmallMoonIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path fill="currentColor" d="M2 12a10 10 0 0 0 13 9.54a10 10 0 0 1 0-19.08A10 10 0 0 0 2 12" />
+      <path
+        d="M15.4 3.1a8.25 8.25 0 1 0 5.5 13.4A7.1 7.1 0 0 1 15.4 3.1z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

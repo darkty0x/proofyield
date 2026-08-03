@@ -10,6 +10,7 @@ import {
   api,
   explorers,
   formatApy,
+  formatNumber,
   formatSupply,
   formatUsd,
   type HistoryPoint,
@@ -18,7 +19,7 @@ import {
   type VaultStatus,
 } from "@/lib/api";
 
-type Tab = "vault" | "proofs" | "allocator";
+type Tab = "vault" | "portfolio" | "proofs" | "allocator";
 type Action = "deposit" | "withdraw";
 
 const FILTERS = ["all", "harvested", "attested", "pending", "attesting", "rejected"] as const;
@@ -35,12 +36,124 @@ const TRANCHE_ART: Record<string, string> = {
   mezz: "/brand/crystal/crystal-fx.jpg",
 };
 
+/** Demo rows so Proofs UI can be reviewed without a live harvest. */
+const TEMPLATE_PROOFS: ProofItem[] = [
+  {
+    id: "tpl-harvested-1",
+    status: "harvested",
+    coupon: {
+      sourceId: 1,
+      couponId: 1042,
+      amount: 2450,
+      metadata: "T-Bill Proxy Desk · CouponPaid",
+      sepoliaTxHash: "0x8a1c2b3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcd",
+      blockNumber: 5_812_440,
+      observedAt: "2026-08-02T14:22:00.000Z",
+    },
+    decision: {
+      action: "accept",
+      riskScore: 18,
+      rationale: "Within TVL cap and risk band for treasury tranche. Attestcoin inclusion verified.",
+      sourceRank: 1,
+    },
+    attestcoin: { verified: true, headerNumber: 1_204_551, chainKey: 11155111 },
+    harvest: {
+      ctcTxHash: "0xctc91aa22bb33cc44dd55ee66ff77889900112233445566778899aabbccddee",
+      sharePriceAfter: 1.00482,
+    },
+    updatedAt: "2026-08-02T14:23:12.000Z",
+  },
+  {
+    id: "tpl-attested-2",
+    status: "attested",
+    coupon: {
+      sourceId: 2,
+      couponId: 881,
+      amount: 1800,
+      metadata: "Trade Finance Invoice Pool · CouponPaid",
+      sepoliaTxHash: "0x71ff00aa11bb22cc33dd44ee55ff6677889900aabbccddeeff001122334455",
+      blockNumber: 5_812_901,
+      observedAt: "2026-08-03T09:10:00.000Z",
+    },
+    decision: {
+      action: "accept",
+      riskScore: 32,
+      rationale: "Senior invoice pool coupon cleared risk score. Waiting harvest accrual.",
+      sourceRank: 2,
+    },
+    attestcoin: { verified: true, headerNumber: 1_204_880, chainKey: 11155111 },
+    updatedAt: "2026-08-03T09:11:40.000Z",
+  },
+  {
+    id: "tpl-attesting-3",
+    status: "attesting",
+    coupon: {
+      sourceId: 3,
+      couponId: 512,
+      amount: 960,
+      metadata: "Emerging Market Receivables · CouponPaid",
+      sepoliaTxHash: "0x55aa66bb77cc88dd99ee00ff11223344556677889900aabbccddeeff001122",
+      blockNumber: 5_813_120,
+      observedAt: "2026-08-03T18:40:00.000Z",
+    },
+    decision: {
+      action: "accept",
+      riskScore: 41,
+      rationale: "Mezz coupon accepted under weight limit. Attestcoin proof in flight.",
+      sourceRank: 3,
+    },
+    attestcoin: { verified: false, chainKey: 11155111 },
+    updatedAt: "2026-08-03T18:40:55.000Z",
+  },
+  {
+    id: "tpl-pending-4",
+    status: "pending",
+    coupon: {
+      sourceId: 1,
+      couponId: 1048,
+      amount: 1200,
+      metadata: "T-Bill Proxy Desk · CouponPaid",
+      sepoliaTxHash: "0xabcdef0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+      blockNumber: 5_813_400,
+      observedAt: "2026-08-04T01:05:00.000Z",
+    },
+    decision: {
+      action: "queue",
+      riskScore: 22,
+      rationale: "Queued for AI allocator scoring against current desk weights.",
+      sourceRank: 1,
+    },
+    updatedAt: "2026-08-04T01:05:20.000Z",
+  },
+  {
+    id: "tpl-rejected-5",
+    status: "rejected",
+    coupon: {
+      sourceId: 3,
+      couponId: 490,
+      amount: 4200,
+      metadata: "Emerging Market Receivables · CouponPaid",
+      sepoliaTxHash: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+      blockNumber: 5_811_002,
+      observedAt: "2026-08-01T11:00:00.000Z",
+    },
+    decision: {
+      action: "reject",
+      riskScore: 78,
+      rationale: "Exceeds mezz TVL cap and risk ceiling — coupon not attested.",
+      sourceRank: 3,
+    },
+    error: "Risk ceiling breached",
+    updatedAt: "2026-08-01T11:00:45.000Z",
+  },
+];
+
 export default function VaultAppPage() {
   const [tab, setTab] = useState<Tab>("vault");
   const [action, setAction] = useState<Action>("deposit");
   const [status, setStatus] = useState<VaultStatus | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
-  const [proofs, setProofs] = useState<ProofItem[]>([]);
+  const [proofs, setProofs] = useState<ProofItem[]>(TEMPLATE_PROOFS);
   const [sources, setSources] = useState<SourceItem[]>([]);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
   const [query, setQuery] = useState("");
@@ -61,10 +174,11 @@ export default function VaultAppPage() {
       ]);
       setStatus(s);
       setHistory(h.items);
-      setProofs(p.items);
+      setProofs(p.items.length > 0 ? p.items : TEMPLATE_PROOFS);
       setSources(src.items);
       setError(null);
     } catch (err) {
+      setProofs(TEMPLATE_PROOFS);
       setError(err instanceof Error ? err.message : "API unreachable");
     }
   }, [filter, query]);
@@ -83,6 +197,28 @@ export default function VaultAppPage() {
   const supply = useMemo(() => formatSupply(status?.tokenSupply ?? 0), [status]);
   const share = status?.shareSymbol ?? "pyvUSD";
   const asset = status?.assetSymbol ?? "pyUSD";
+  const myShares = status?.depositorShares ?? 0;
+  const myValue = myShares * (status?.sharePrice ?? 1);
+  const displayProofs = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return proofs.filter((p) => {
+      if (filter !== "all" && p.status !== filter) return false;
+      if (!q) return true;
+      const hay = [
+        p.id,
+        p.status,
+        p.coupon.metadata,
+        p.coupon.sepoliaTxHash,
+        String(p.coupon.sourceId),
+        String(p.coupon.couponId),
+        p.harvest?.ctcTxHash ?? "",
+        p.decision?.rationale ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [proofs, filter, query]);
 
   async function run(fn: () => Promise<unknown>, okMsg: string) {
     setBusy(true);
@@ -103,9 +239,9 @@ export default function VaultAppPage() {
     const n = Number(amount);
     if (!(n > 0)) return;
     if (action === "deposit") {
-      void run(() => api.deposit(n), `Deposited ${amount} ${asset}`);
+      void run(() => api.deposit(n), `Deposited ${formatNumber(n)} ${asset}`);
     } else {
-      void run(() => api.withdraw(n), `Withdrew ${amount} ${asset}`);
+      void run(() => api.withdraw(n), `Withdrew ${formatNumber(n)} ${asset}`);
     }
   }
 
@@ -134,6 +270,7 @@ export default function VaultAppPage() {
         {(
           [
             ["vault", "Vault"],
+            ["portfolio", "Portfolio"],
             ["proofs", "Proofs"],
             ["allocator", "Allocator"],
           ] as const
@@ -250,7 +387,14 @@ export default function VaultAppPage() {
                     </div>
                     <div>
                       <dt>Your shares</dt>
-                      <dd>{status?.depositorShares?.toFixed(2) ?? "—"}</dd>
+                      <dd>
+                        {status?.depositorShares != null
+                          ? formatNumber(status.depositorShares, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })
+                          : "—"}
+                      </dd>
                     </div>
                   </dl>
                   {status?.vaultAddress ? (
@@ -333,7 +477,10 @@ export default function VaultAppPage() {
                     <dt>Est. shares</dt>
                     <dd>
                       {status?.sharePrice
-                        ? (Number(amount || 0) / status.sharePrice).toFixed(2)
+                        ? formatNumber(Number(amount || 0) / status.sharePrice, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
                         : "—"}{" "}
                       {share}
                     </dd>
@@ -378,6 +525,83 @@ export default function VaultAppPage() {
           </div>
         ) : null}
 
+        {tab === "portfolio" ? (
+          <section className={styles.portfolio}>
+            <div className={styles.portfolioHead}>
+              <h1 className={styles.vaultTitle}>My portfolio</h1>
+              <p className={styles.portfolioLead}>
+                Your {share} position in the ProofYield RWA vault — value moves only after Attestcoin-proven
+                harvests.
+              </p>
+            </div>
+
+            <div className={styles.metricRow}>
+              <div className={styles.metric}>
+                <div className={styles.metricK}>Your shares</div>
+                <div className={styles.metricV}>
+                  {formatNumber(myShares, { maximumFractionDigits: 2 })}
+                </div>
+                <div className={styles.metricHint}>{share}</div>
+              </div>
+              <div className={styles.metric}>
+                <div className={styles.metricK}>Position value</div>
+                <div className={styles.metricV}>{formatUsd(myValue)}</div>
+                <div className={styles.metricHint}>At live NAV</div>
+              </div>
+              <div className={styles.metric}>
+                <div className={styles.metricK}>NAV</div>
+                <div className={styles.metricV}>{status?.sharePrice?.toFixed(4) ?? "—"}</div>
+                <div className={styles.metricHint}>Per {share}</div>
+              </div>
+              <div className={styles.metric}>
+                <div className={styles.metricK}>Promised APY</div>
+                <div className={styles.metricV}>{apy}</div>
+                <div className={styles.metricHint}>Target on proven yield</div>
+              </div>
+            </div>
+
+            <div className={styles.detailGrid}>
+              <article className={styles.detailCard}>
+                <h3>Position</h3>
+                <dl>
+                  <div>
+                    <dt>Shares</dt>
+                    <dd>
+                      {formatNumber(myShares, { maximumFractionDigits: 4 })} {share}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Value</dt>
+                    <dd>{formatUsd(myValue)}</dd>
+                  </div>
+                  <div>
+                    <dt>Underlying</dt>
+                    <dd>{asset}</dd>
+                  </div>
+                  <div>
+                    <dt>Vault TVL</dt>
+                    <dd>{tvl}</dd>
+                  </div>
+                </dl>
+                <button type="button" className={styles.secondary} onClick={() => setTab("vault")}>
+                  Deposit or withdraw
+                </button>
+              </article>
+              <article className={styles.detailCard}>
+                <h3>Activity</h3>
+                <p>
+                  Proven yield accrued vault-wide: {formatUsd(status?.totalHarvested ?? 0)} across{" "}
+                  {status?.harvestCount ?? 0} harvests. Your share of NAV rises automatically when coupons clear
+                  Attestcoin.
+                </p>
+                <button type="button" className={styles.secondary} onClick={() => setTab("proofs")}>
+                  Review proofs
+                </button>
+              </article>
+            </div>
+          </section>
+        ) : null}
+
         {tab === "proofs" ? (
           <section className={styles.panelWide}>
             <div className={styles.toolbar}>
@@ -407,10 +631,10 @@ export default function VaultAppPage() {
                 <span>Status</span>
                 <span>Updated</span>
               </div>
-              {proofs.length === 0 ? (
-                <div className={styles.empty}>No proofs yet. Run Prove & harvest from Vault.</div>
+              {displayProofs.length === 0 ? (
+                <div className={styles.empty}>No proofs match this filter.</div>
               ) : (
-                proofs.map((p) => {
+                displayProofs.map((p) => {
                   const open = openId === p.id;
                   return (
                     <div key={p.id} className={styles.tblock}>
@@ -462,10 +686,10 @@ export default function VaultAppPage() {
                 TRANCHE_ART[s.tranche] ??
                 "/brand/crystal/crystal-hold.jpg";
               return (
-                <article key={s.sourceId} className={styles.allocCard}>
+                <article key={s.sourceId} className={styles.allocCard} aria-readonly="true">
                   <div className={styles.allocMedia}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={art} alt="" className={styles.allocImg} />
+                    <img src={art} alt="" className={styles.allocImg} draggable={false} />
                     <div className={styles.allocMediaTop}>
                       <div className={styles.allocId}>SRC {s.sourceId}</div>
                       <div className={styles.status}>{s.active ? "active" : "paused"}</div>
@@ -477,6 +701,7 @@ export default function VaultAppPage() {
                       width={40}
                       height={40}
                       className={styles.allocCoin}
+                      draggable={false}
                     />
                   </div>
                   <div className={styles.allocBody}>
@@ -521,6 +746,9 @@ export default function VaultAppPage() {
               <nav className={styles.footerColLinks}>
                 <button type="button" onClick={() => setTab("vault")}>
                   Vault
+                </button>
+                <button type="button" onClick={() => setTab("portfolio")}>
+                  Portfolio
                 </button>
                 <button type="button" onClick={() => setTab("proofs")}>
                   Proofs

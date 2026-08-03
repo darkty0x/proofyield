@@ -796,6 +796,28 @@
   min-height: 420px;
   display: flex;
   flex-direction: column;
+  border-radius: 20px;
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+}
+
+.portfolio {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.portfolioHead {
+  max-width: 640px;
+}
+
+.portfolioLead {
+  margin-top: 10px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--muted);
+  font-weight: 500;
 }
 
 .allocMedia {

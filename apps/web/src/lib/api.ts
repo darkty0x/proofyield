@@ -101,20 +101,29 @@ export const api = {
     postJson<ProofItem>("/api/demo/harvest", payload ?? {}),
 };
 
+/** Thousand-separated number, e.g. 1,250,995.18 */
+export function formatNumber(
+  n: number,
+  opts?: { maximumFractionDigits?: number; minimumFractionDigits?: number },
+): string {
+  const max = opts?.maximumFractionDigits ?? 2;
+  const min = opts?.minimumFractionDigits ?? 0;
+  return n.toLocaleString("en-US", {
+    maximumFractionDigits: max,
+    minimumFractionDigits: min,
+  });
+}
+
 export function formatUsd(n: number): string {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
-  return `$${n.toFixed(2)}`;
+  return `$${formatNumber(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export function formatApy(bps: number): string {
-  return `${(bps / 100).toFixed(2)}%`;
+  return `${formatNumber(bps / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
 }
 
 export function formatSupply(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return n.toLocaleString();
+  return formatNumber(n, { maximumFractionDigits: 2 });
 }
 
 export const explorers = {

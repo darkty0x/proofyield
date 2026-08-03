@@ -64,8 +64,8 @@
   --theme-toggle-bg: rgba(255, 255, 255, 0.06);
   --theme-toggle-fg-hover: #fff;
   --theme-toggle-bg-hover: rgba(255, 255, 255, 0.1);
-  --theme-toggle-active-bg: #ffffff;
-  --theme-toggle-active-fg: #070b12;
+  --theme-toggle-active-bg: #3d8bff;
+  --theme-toggle-active-fg: #fff;
 }
 
 html[data-theme="dark"],

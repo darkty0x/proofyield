@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./landing.module.css";
-import { api, formatApy, formatUsd, type HistoryPoint } from "@/lib/api";
+import { api, formatApy, formatSupply, formatUsd, type HistoryPoint } from "@/lib/api";
 import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
 import { useTheme } from "@/components/theme";
 
@@ -131,9 +131,9 @@ export default function LandingPage() {
   const { theme } = useTheme();
   const darkSurface = theme !== "light";
   const [apy, setApy] = useState("8.42%");
-  const [tvl, setTvl] = useState("$1.26M");
+  const [tvl, setTvl] = useState("$1,260,000.00");
   const [nav, setNav] = useState("1.0048");
-  const [supply, setSupply] = useState("10.00M");
+  const [supply, setSupply] = useState("10,000,000");
   const [updatedAgo, setUpdatedAgo] = useState("just now");
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   useReveal();
@@ -154,11 +154,7 @@ export default function LandingPage() {
         setNav(s.sharePrice.toFixed(4));
         setHistory(h.items);
         if (s.tokenSupply) {
-          setSupply(
-            s.tokenSupply >= 1_000_000
-              ? `${(s.tokenSupply / 1_000_000).toFixed(2)}M`
-              : s.tokenSupply.toLocaleString(),
-          );
+          setSupply(formatSupply(s.tokenSupply));
         }
         if (s.lastSuccessAt) {
           const sec = Math.max(0, Math.round((Date.now() - new Date(s.lastSuccessAt).getTime()) / 1000));
