@@ -4,6 +4,8 @@
   background: #070b12;
   color: #e8eef8;
   overflow-x: clip;
+  display: flex;
+  flex-direction: column;
 }
 
 .bgGlow {
@@ -23,25 +25,33 @@
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
   max-width: 1240px;
   margin: 0 auto;
-  padding: 20px 28px;
+  padding: 28px 32px 12px;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   font-family: var(--font-display), "Helvetica Neue", Helvetica, sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: -0.02em;
   justify-self: start;
 }
 
 .brand img {
-  border-radius: 7px;
+  border-radius: 8px;
+}
+
+.logoWord {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.logoWord span {
+  font-weight: 700;
 }
 
 .menu {
@@ -74,7 +84,89 @@
   justify-self: end;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
+}
+
+.walletWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.walletBtn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #3d8bff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.walletBtn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.walletBtn:disabled {
+  opacity: 0.6;
+}
+
+.walletConnected {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8eef8;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
+  letter-spacing: -0.02em;
+  transition: background 0.15s ease;
+}
+
+.walletConnected:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.walletConnected i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: block;
+}
+
+.walletWarn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(240, 180, 40, 0.35);
+  background: rgba(240, 180, 40, 0.12);
+  color: #f0c85a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.walletErr {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  max-width: 240px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(196, 75, 60, 0.2);
+  border: 1px solid rgba(196, 75, 60, 0.35);
+  color: #ffb4ab;
+  font-size: 11px;
+  line-height: 1.35;
+  z-index: 5;
 }
 
 .mode {
@@ -102,27 +194,19 @@
   box-shadow: 0 0 0 4px rgba(90, 162, 255, 0.2);
 }
 
-.siteLink {
-  font-size: 13px;
-  color: rgba(232, 238, 248, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.siteLink:hover {
-  color: #fff;
-}
-
 .main {
   position: relative;
   z-index: 1;
+  flex: 1;
+  width: 100%;
   max-width: 1240px;
   margin: 0 auto;
-  padding: 12px 28px 64px;
+  padding: 24px 32px 80px;
 }
 
 .bannerErr,
 .bannerOk {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   padding: 12px 16px;
   border-radius: 12px;
   font-size: 14px;
@@ -143,25 +227,25 @@
 .vaultLayout {
   display: grid;
   grid-template-columns: 1.45fr 0.7fr;
-  gap: 22px;
+  gap: 32px;
   align-items: start;
 }
 
 .vaultInfo {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px;
 }
 
 .vaultHead {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: flex-start;
 }
 
 .vaultCoin {
   border-radius: 50%;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 40px rgba(56, 132, 255, 0.25);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 10px 28px rgba(180, 120, 20, 0.22);
 }
 
 .vaultTitle {
@@ -203,11 +287,11 @@
 .metricRow {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 14px;
 }
 
 .metric {
-  padding: 18px 16px;
+  padding: 20px 18px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -246,7 +330,7 @@
 }
 
 .chartCard {
-  padding: 20px 20px 12px;
+  padding: 24px 24px 16px;
 }
 
 .chartHead {
@@ -288,11 +372,11 @@
 .detailGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 }
 
 .detailCard {
-  padding: 22px 20px;
+  padding: 26px 24px;
 }
 
 .detailCard h3 {
@@ -368,8 +452,8 @@
 
 .trade {
   position: sticky;
-  top: 20px;
-  padding: 8px;
+  top: 28px;
+  padding: 10px;
 }
 
 .tradeTabs {
@@ -713,5 +797,115 @@
   .trow span:nth-child(3),
   .trow span:nth-child(4) {
     display: none;
+  }
+}
+
+.footer {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  background: #050505;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footerInner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 56px 32px 36px;
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 320px;
+}
+
+.footerLogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: #fff;
+}
+
+.footerLogo img {
+  border-radius: 8px;
+}
+
+.footerTag {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(232, 238, 248, 0.45);
+}
+
+.footerCols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.footerColTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(232, 238, 248, 0.35);
+  margin-bottom: 14px;
+}
+
+.footerColLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(232, 238, 248, 0.72);
+}
+
+.footerColLinks a,
+.footerColLinks button {
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.footerColLinks a:hover,
+.footerColLinks button:hover {
+  color: #fff;
+}
+
+.footerBottom {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 20px 32px 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 24px;
+  font-size: 12px;
+  color: rgba(232, 238, 248, 0.35);
+}
+
+@media (max-width: 900px) {
+  .footerInner {
+    grid-template-columns: 1fr;
+  }
+
+  .footerCols {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footerBottom {
+    flex-direction: column;
   }
 }

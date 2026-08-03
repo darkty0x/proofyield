@@ -162,15 +162,17 @@ export default function LandingPage() {
       <header className={styles.nav}>
         <div className={styles.navInner}>
           <Link href="/" className={styles.logo}>
-            <Image src="/brand/proofyield-mark.svg" alt="" width={28} height={28} className={styles.logoMark} />
-            ProofYield
+            <Image src="/brand/proofyield-mark.svg" alt="" width={30} height={30} className={styles.logoMark} />
+            <span className={styles.logoWord}>
+              Proof<span>Yield</span>
+            </span>
           </Link>
           <nav className={styles.navLinks}>
             <a href="#how">How it works</a>
             <a href="#engines">Strategy</a>
             <a href="#markets">Markets</a>
             <a href="#compare">Yield</a>
-            <a href="#powered">Powered by</a>
+            <a href="#powered">Infrastructure</a>
           </nav>
           <Link href="/app" className={styles.navCta}>
             Start earning
@@ -365,7 +367,7 @@ export default function LandingPage() {
           <aside className={styles.engineResult}>
             <div className={styles.engineResultTop}>
               <Image
-                src="/brand/pyvusd-coin.png"
+                src="/brand/pyvusd-flat.png"
                 alt=""
                 width={44}
                 height={44}
@@ -485,8 +487,17 @@ export default function LandingPage() {
           <div className={styles.transparencyCard}>
             <div className={styles.navLabel}>NAV per share</div>
             <div className={styles.navValueBig}>
-              {nav}
-              <small>pyUSD</small>
+              <Image
+                src="/brand/pyvusd-flat.png"
+                alt=""
+                width={40}
+                height={40}
+                className={styles.navCoin}
+              />
+              <span className={styles.navValueText}>
+                {nav}
+                <small>pyUSD</small>
+              </span>
             </div>
             <NavSpark points={history} />
             <div className={styles.navUpdate}>Last update {updatedAgo}</div>
@@ -511,7 +522,7 @@ export default function LandingPage() {
               <div className={styles.compareLeft}>
                 <div className={styles.compareIcon}>
                   {row.hot ? (
-                    <Image src="/brand/pyvusd-coin.png" alt="" width={28} height={28} />
+                    <Image src="/brand/pyvusd-flat.png" alt="" width={28} height={28} />
                   ) : (
                     <span />
                   )}
@@ -668,8 +679,10 @@ export default function LandingPage() {
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
             <div className={styles.footerLogo}>
-              <Image src="/brand/proofyield-mark.svg" alt="" width={32} height={32} className={styles.logoMark} />
-              ProofYield
+              <Image src="/brand/proofyield-mark.svg" alt="" width={30} height={30} className={styles.logoMark} />
+              <span className={styles.logoWord}>
+                Proof<span>Yield</span>
+              </span>
             </div>
             <p className={styles.footerTag}>
               Deposit once. Earn RWA yield with Attestcoin proofs on Creditcoin.

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { VaultChart } from "./chart";
+import { WalletButton } from "./wallet-button";
 import styles from "./app.module.css";
 import {
   api,
@@ -102,8 +103,10 @@ export default function VaultAppPage() {
       <header className={styles.topNav}>
         <Link href="/" className={styles.brand}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/proofyield-mark.svg" alt="" width={28} height={28} />
-          ProofYield
+          <img src="/brand/proofyield-mark.svg" alt="" width={30} height={30} />
+          <span className={styles.logoWord}>
+            Proof<span>Yield</span>
+          </span>
         </Link>
 
         <nav className={styles.menu}>
@@ -126,13 +129,7 @@ export default function VaultAppPage() {
         </nav>
 
         <div className={styles.topRight}>
-          <span className={styles.mode}>
-            <i className={status?.live ? styles.dotLive : styles.dotDemo} />
-            {status?.live ? "Live" : status?.statusLabel ?? "Demo"}
-          </span>
-          <Link href="/" className={styles.siteLink}>
-            Marketing
-          </Link>
+          <WalletButton />
         </div>
       </header>
 
@@ -145,13 +142,13 @@ export default function VaultAppPage() {
             <section className={styles.vaultInfo}>
               <div className={styles.vaultHead}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/pyvusd-coin.png" alt="" width={48} height={48} className={styles.vaultCoin} />
+                <img src="/brand/pyvusd-flat.png" alt="" width={48} height={48} className={styles.vaultCoin} />
                 <div>
                   <h1 className={styles.vaultTitle}>ProofYield RWA Vault</h1>
                   <div className={styles.badges}>
                     <span className={styles.badge}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/brand/pyvusd-coin.png" alt="" width={14} height={14} />
+                      <img src="/brand/pyvusd-flat.png" alt="" width={14} height={14} />
                       {share}
                     </span>
                     <span className={styles.badge}>
@@ -296,12 +293,12 @@ export default function VaultAppPage() {
               <form onSubmit={onSubmit}>
                 <div className={styles.assetRow}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/brand/pyusd-coin.png" alt="" width={22} height={22} />
+                  <img src="/brand/pyusd-flat.png" alt="" width={22} height={22} />
                   <span>
                     {asset} → {share}
                   </span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/brand/pyvusd-coin.png" alt="" width={22} height={22} />
+                  <img src="/brand/pyvusd-flat.png" alt="" width={22} height={22} />
                 </div>
 
                 <label className={styles.amountLabel}>Amount</label>
@@ -472,6 +469,72 @@ export default function VaultAppPage() {
           </section>
         ) : null}
       </main>
+
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <div className={styles.footerBrand}>
+            <Link href="/" className={styles.footerLogo}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/proofyield-mark.svg" alt="" width={28} height={28} />
+              <span className={styles.logoWord}>
+                Proof<span>Yield</span>
+              </span>
+            </Link>
+            <p className={styles.footerTag}>
+              RWA yield vault with Attestcoin proofs on Creditcoin CC3.
+            </p>
+          </div>
+
+          <div className={styles.footerCols}>
+            <div>
+              <h3 className={styles.footerColTitle}>App</h3>
+              <nav className={styles.footerColLinks}>
+                <button type="button" onClick={() => setTab("vault")}>
+                  Vault
+                </button>
+                <button type="button" onClick={() => setTab("proofs")}>
+                  Proofs
+                </button>
+                <button type="button" onClick={() => setTab("allocator")}>
+                  Allocator
+                </button>
+              </nav>
+            </div>
+            <div>
+              <h3 className={styles.footerColTitle}>Protocol</h3>
+              <nav className={styles.footerColLinks}>
+                <a href="https://creditcoin.org/" target="_blank" rel="noreferrer">
+                  Creditcoin
+                </a>
+                <a href="https://docs.creditcoin.org/creditcoin-usc" target="_blank" rel="noreferrer">
+                  Attestcoin docs
+                </a>
+                <Link href="/#usc">Proof model</Link>
+              </nav>
+            </div>
+            <div>
+              <h3 className={styles.footerColTitle}>Build</h3>
+              <nav className={styles.footerColLinks}>
+                <Link href="/">Marketing site</Link>
+                <a href="https://github.com/darkty0x/proofyield" target="_blank" rel="noreferrer">
+                  GitHub
+                </a>
+                <a
+                  href="https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  DoraHacks CTC
+                </a>
+              </nav>
+            </div>
+          </div>
+        </div>
+        <div className={styles.footerBottom}>
+          <span>© 2026 ProofYield · BUIDL CTC 2026 Fall</span>
+          <span>DeFi + RWA + AI · Powered by Creditcoin</span>
+        </div>
+      </footer>
     </div>
   );
 }
