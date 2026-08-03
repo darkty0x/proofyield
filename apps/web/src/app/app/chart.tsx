@@ -25,7 +25,9 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<number | null>(null);
 
-  const { values, coords, line, area, w, h, padX, padY, delta } = useMemo(() => {
+  const chart = useMemo(() => {
+    if (points.length === 0) return null;
+
     const values = points.map((p) => (metric === "tvl" ? p.tvl : p.sharePrice));
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -42,7 +44,9 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
     });
 
     const line = coords.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
-    const area = `${line} L${coords[coords.length - 1][0].toFixed(1)} ${h} L${coords[0][0].toFixed(1)} ${h} Z`;
+    const lastPt = coords[coords.length - 1];
+    const firstPt = coords[0];
+    const area = `${line} L${lastPt[0].toFixed(1)} ${h} L${firstPt[0].toFixed(1)} ${h} Z`;
 
     const last = values[values.length - 1];
     const first = values[0];
@@ -54,7 +58,8 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
   const onMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
       const el = wrapRef.current;
-      if (!el || coords.length === 0) return;
+      if (!el || !chart || chart.coords.length === 0) return;
+      const { coords, padX, w } = chart;
       const rect = el.getBoundingClientRect();
       const ratio = (e.clientX - rect.left) / Math.max(rect.width, 1);
       const x = padX + ratio * (w - padX * 2);
@@ -69,15 +74,16 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
       }
       setHover(best);
     },
-    [coords, padX, w],
+    [chart],
   );
 
   const onLeave = useCallback(() => setHover(null), []);
 
-  if (!points.length) {
+  if (!chart) {
     return <div className={styles.empty}>No history yet</div>;
   }
 
+  const { values, coords, line, area, w, h, padY, delta } = chart;
   const active = hover ?? coords.length - 1;
   const [ax, ay] = coords[active];
   const tipLeft = Math.min(Math.max((ax / w) * 100, 12), 88);
@@ -141,7 +147,12 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
         )}
 
         {hover === null && (
-          <circle cx={coords[coords.length - 1][0]} cy={coords[coords.length - 1][1]} r="4.5" fill="#8fd3ff" />
+          <circle
+            cx={coords[coords.length - 1][0]}
+            cy={coords[coords.length - 1][1]}
+            r="4.5"
+            fill="#8fd3ff"
+          />
         )}
       </svg>
 
