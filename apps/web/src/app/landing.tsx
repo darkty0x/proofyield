@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./landing.module.css";
 import { api, formatApy, formatUsd, type HistoryPoint } from "@/lib/api";
 import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
+import { useTheme } from "@/components/theme";
 
 function useReveal() {
   useEffect(() => {
@@ -41,6 +42,7 @@ const POWERED = [
     name: "Creditcoin",
     href: "https://creditcoin.org/",
     src: "/brand/partners/creditcoin-wordmark.png",
+    invertOnDark: true,
     wide: true,
     blurb: "L1 for cross-chain builders",
   },
@@ -48,6 +50,7 @@ const POWERED = [
     name: "Attestcoin",
     href: "https://docs.creditcoin.org/creditcoin-usc",
     src: "/brand/partners/attestcoin.svg",
+    invertOnDark: true,
     wide: true,
     blurb: "Decentralized oracle / USC",
   },
@@ -55,6 +58,7 @@ const POWERED = [
     name: "Credit Labs",
     href: "https://creditcoin.org/Fund",
     src: "/brand/partners/creditlabs.svg",
+    invertOnDark: true,
     wide: true,
     blurb: "CEIP ecosystem fund",
   },
@@ -62,6 +66,8 @@ const POWERED = [
     name: "DoraHacks",
     href: "https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail",
     src: "/brand/partners/dorahacks.svg",
+    srcDark: "/brand/partners/dorahacks-dark.png",
+    invertOnDark: false,
     wide: true,
     blurb: "BUIDL CTC 2026 Fall",
   },
@@ -69,6 +75,7 @@ const POWERED = [
     name: "Gluwa",
     href: "https://www.gluwa.com/",
     src: "/brand/partners/gluwa-wordmark.png",
+    invertOnDark: true,
     wide: true,
     blurb: "Creditcoin technology",
   },
@@ -121,6 +128,8 @@ function NavSpark({ points }: { points: HistoryPoint[] }) {
 }
 
 export default function LandingPage() {
+  const { theme } = useTheme();
+  const darkSurface = theme !== "light";
   const [apy, setApy] = useState("8.42%");
   const [tvl, setTvl] = useState("$1.26M");
   const [nav, setNav] = useState("1.0048");
@@ -128,6 +137,11 @@ export default function LandingPage() {
   const [updatedAgo, setUpdatedAgo] = useState("just now");
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   useReveal();
+
+  const partnerSrc = (p: (typeof POWERED)[number]) =>
+    darkSurface && p.srcDark ? p.srcDark : p.src;
+  const partnerLogoClass = (p: (typeof POWERED)[number], base: string) =>
+    `${base}${darkSurface && p.invertOnDark ? ` ${styles.logoOnDark}` : ""}`;
 
   useEffect(() => {
     let alive = true;
@@ -483,11 +497,11 @@ export default function LandingPage() {
           {POWERED.slice(0, 2).map((p) => (
             <a key={p.name} href={p.href} target="_blank" rel="noreferrer" className={styles.poweredCard}>
               <Image
-                src={p.src}
+                src={partnerSrc(p)}
                 alt={p.name}
                 width={220}
                 height={56}
-                className={`${styles.poweredLogo} ${styles.logoOnDark}`}
+                className={partnerLogoClass(p, styles.poweredLogo)}
               />
               <div className={styles.logoBlurb}>{p.blurb}</div>
             </a>
@@ -497,11 +511,11 @@ export default function LandingPage() {
           {POWERED.map((p) => (
             <a key={p.name} href={p.href} target="_blank" rel="noreferrer" className={styles.stripItem}>
               <Image
-                src={p.src}
+                src={partnerSrc(p)}
                 alt={p.name}
                 width={180}
                 height={44}
-                className={`${styles.stripLogo} ${styles.logoOnDark}`}
+                className={partnerLogoClass(p, styles.stripLogo)}
               />
             </a>
           ))}
