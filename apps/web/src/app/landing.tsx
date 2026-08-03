@@ -682,7 +682,7 @@ export default function LandingPage() {
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
             <div className={styles.footerLogo}>
-              <BrandLogo />
+              <BrandLogo onDark />
             </div>
             <p className={styles.footerTag}>
               Deposit once. Earn RWA yield with Attestcoin proofs on Creditcoin.

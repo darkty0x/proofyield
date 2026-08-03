@@ -509,7 +509,7 @@ export default function VaultAppPage() {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <BrandLogo markSize={28} />
+            <BrandLogo markSize={28} onDark />
             <p className={styles.footerTag}>
               RWA yield vault with Attestcoin proofs on Creditcoin CC3.
             </p>
