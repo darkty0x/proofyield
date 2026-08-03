@@ -158,7 +158,7 @@
 }
 
 .navLinks a:hover {
-  color: var(--ink);
+  color: var(--theme-ink, #fff);
 }
 
 .navCta {
@@ -308,6 +308,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: #101820;
 }
 
 .ctaArrow {
@@ -1011,8 +1012,8 @@ html[data-theme="dark-gold"] .logoRaster {
   height: 48px;
   padding: 0 22px;
   border-radius: 999px;
-  background: var(--cta-bg);
-  color: #fff;
+  background: var(--submit-bg, #2f78f0);
+  color: var(--submit-fg, #fff);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.02em;
