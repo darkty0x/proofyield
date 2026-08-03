@@ -193,7 +193,7 @@ export default function LandingPage() {
       rate: "4.3%",
       bar: 51,
       hot: false,
-      icon: "/brand/crystal/crystal-equities.jpg",
+      icon: "/brand/pyusd-mark.svg",
     },
     {
       name: "Fintech savings",
@@ -201,7 +201,7 @@ export default function LandingPage() {
       rate: "4.0%",
       bar: 47,
       hot: false,
-      icon: "/brand/crystal/crystal-engine-funding.jpg",
+      icon: "/brand/proofyield-mark.svg",
     },
     {
       name: "Banks",
@@ -209,7 +209,7 @@ export default function LandingPage() {
       rate: "0.4%",
       bar: 8,
       hot: false,
-      icon: "/brand/crystal/crystal-engine-stat.jpg",
+      icon: "/brand/creditcoin.png",
     },
   ];
 
