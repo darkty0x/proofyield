@@ -22,6 +22,18 @@ type Action = "deposit" | "withdraw";
 
 const FILTERS = ["all", "harvested", "attested", "pending", "attesting", "rejected"] as const;
 
+const ALLOC_ART: Record<string, string> = {
+  "T-Bill Proxy Desk": "/brand/crystal/crystal-equities.jpg",
+  "Trade Finance Invoice Pool": "/brand/crystal/crystal-engine-funding.jpg",
+  "Emerging Market Receivables": "/brand/crystal/crystal-fx.jpg",
+};
+
+const TRANCHE_ART: Record<string, string> = {
+  treasury: "/brand/crystal/crystal-equities.jpg",
+  senior: "/brand/crystal/crystal-engine-funding.jpg",
+  mezz: "/brand/crystal/crystal-fx.jpg",
+};
+
 export default function VaultAppPage() {
   const [tab, setTab] = useState<Tab>("vault");
   const [action, setAction] = useState<Action>("deposit");
@@ -440,32 +452,52 @@ export default function VaultAppPage() {
 
         {tab === "allocator" ? (
           <section className={styles.allocGrid}>
-            {sources.map((s) => (
-              <article key={s.sourceId} className={styles.allocCard}>
-                <div className={styles.allocTop}>
-                  <div className={styles.allocId}>SRC {s.sourceId}</div>
-                  <div className={styles.status}>{s.active ? "active" : "paused"}</div>
-                </div>
-                <h2>{s.name}</h2>
-                <dl className={styles.allocDl}>
-                  <div>
-                    <dt>Tranche</dt>
-                    <dd>{s.tranche}</dd>
+            {sources.map((s) => {
+              const art =
+                ALLOC_ART[s.name] ??
+                TRANCHE_ART[s.tranche] ??
+                "/brand/crystal/crystal-hold.jpg";
+              return (
+                <article key={s.sourceId} className={styles.allocCard}>
+                  <div className={styles.allocMedia}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={art} alt="" className={styles.allocImg} />
+                    <div className={styles.allocMediaTop}>
+                      <div className={styles.allocId}>SRC {s.sourceId}</div>
+                      <div className={styles.status}>{s.active ? "active" : "paused"}</div>
+                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/brand/pyvusd-flat.png"
+                      alt=""
+                      width={40}
+                      height={40}
+                      className={styles.allocCoin}
+                    />
                   </div>
-                  <div>
-                    <dt>Risk</dt>
-                    <dd>{s.riskBps} bps</dd>
+                  <div className={styles.allocBody}>
+                    <h2>{s.name}</h2>
+                    <dl className={styles.allocDl}>
+                      <div>
+                        <dt>Tranche</dt>
+                        <dd>{s.tranche}</dd>
+                      </div>
+                      <div>
+                        <dt>Risk</dt>
+                        <dd>{s.riskBps} bps</dd>
+                      </div>
+                      <div>
+                        <dt>Weight</dt>
+                        <dd>{(s.targetWeightBps / 100).toFixed(1)}%</dd>
+                      </div>
+                    </dl>
+                    <div className={styles.barTrack}>
+                      <div className={styles.barFill} style={{ width: `${s.targetWeightBps / 100}%` }} />
+                    </div>
                   </div>
-                  <div>
-                    <dt>Weight</dt>
-                    <dd>{(s.targetWeightBps / 100).toFixed(1)}%</dd>
-                  </div>
-                </dl>
-                <div className={styles.barTrack}>
-                  <div className={styles.barFill} style={{ width: `${s.targetWeightBps / 100}%` }} />
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </section>
         ) : null}
       </main>
