@@ -433,13 +433,6 @@
   background: linear-gradient(90deg, #3d8bff, #8fd3ff);
 }
 
-.statSpark {
-  width: 100%;
-  height: 40px;
-  margin-top: 14px;
-  display: block;
-}
-
 .section {
   max-width: 1120px;
   margin: 0 auto;
@@ -846,66 +839,93 @@
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 360px;
+  min-height: 420px;
 }
 
 .coinPair {
   position: relative;
-  width: 320px;
-  height: 300px;
-  display: grid;
-  place-items: center;
+  width: 380px;
+  height: 380px;
+}
+
+.coinSlotBack,
+.coinSlotFront {
+  position: absolute;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.coinSlotBack {
+  left: 0;
+  top: 48px;
+  z-index: 1;
+}
+
+.coinSlotFront {
+  right: 0;
+  top: 8px;
+  z-index: 2;
 }
 
 .coinImgBack {
-  position: absolute;
-  left: 8px;
-  top: 36px;
-  z-index: 0;
   border-radius: 50%;
-  filter: drop-shadow(0 18px 28px rgba(16, 24, 32, 0.18));
-  transform: rotate(-12deg) scale(0.92);
+  filter: drop-shadow(0 18px 28px rgba(26, 80, 180, 0.28));
+  transform: rotate(-14deg);
+  animation: float-y 6s ease-in-out infinite alternate-reverse;
+}
+
+.coinImg {
+  border-radius: 50%;
+  filter: drop-shadow(0 24px 40px rgba(180, 120, 20, 0.28));
+  transform: rotate(8deg);
+  animation: float-y 5s ease-in-out infinite alternate;
+}
+
+.coinCaption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.coinCaption strong {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.coinCaption span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
 }
 
 .coinGlow {
   position: absolute;
-  width: 300px;
-  height: 300px;
+  width: 340px;
+  height: 340px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(61, 139, 255, 0.4), transparent 68%);
-  filter: blur(14px);
+  background:
+    radial-gradient(circle at 35% 45%, rgba(61, 139, 255, 0.28), transparent 52%),
+    radial-gradient(circle at 70% 40%, rgba(240, 180, 40, 0.22), transparent 50%);
+  filter: blur(18px);
   animation: glow-pulse 4.5s ease-in-out infinite;
-}
-
-.coinImg {
-  position: relative;
-  z-index: 1;
-  border-radius: 50%;
-  animation: float-y 5s ease-in-out infinite alternate;
-  filter: drop-shadow(0 24px 40px rgba(26, 28, 31, 0.22));
 }
 
 .assetMeta {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0;
+  gap: 22px 28px;
   margin: 32px 0 28px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
 }
 
 .assetMeta > div {
-  padding: 18px 16px 18px 0;
-  border-right: 1px solid var(--line);
-}
-
-.assetMeta > div:nth-child(3n) {
-  border-right: none;
-  padding-right: 0;
-}
-
-.assetMeta > div:nth-child(n + 4) {
-  border-top: 1px solid var(--line);
+  padding: 0;
 }
 
 .assetMeta dt {
@@ -1180,17 +1200,18 @@
 .footerInner {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 56px 32px 64px;
+  padding: 64px 32px 40px;
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: 1.1fr 1.4fr;
   gap: 48px;
-  align-items: end;
+  align-items: start;
 }
 
 .footerBrand {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  max-width: 340px;
 }
 
 .footerLogo {
@@ -1204,61 +1225,55 @@
   gap: 12px;
 }
 
-.footerCopy {
+.footerTag {
   font-size: 15px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.footerCopyMuted {
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
-}
-
-.footerRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+.footerCols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 28px;
 }
 
-.footerGrid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  width: 120px;
-  height: 120px;
+.footerColTitle {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 16px;
 }
 
-.footerCellOn {
-  background: #fff;
-  border-radius: 2px;
-}
-
-.footerCellOff {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 2px;
-}
-
-.footerLinks {
+.footerColLinks {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px 22px;
+  flex-direction: column;
+  gap: 12px;
   font-size: 15px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.78);
 }
 
-.footerLinks a {
+.footerColLinks a {
   transition: color 0.15s ease;
 }
 
-.footerLinks a:hover {
+.footerColLinks a:hover {
   color: #fff;
+}
+
+.footerBottom {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 22px 32px 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 24px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 /* —— Atoma-style blocks —— */
@@ -1934,34 +1949,17 @@
     grid-template-columns: 1fr;
   }
 
-  .footerRight {
-    align-items: flex-start;
+  .footerCols {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 20px;
   }
 
-  .footerLinks {
-    justify-content: flex-start;
+  .footerBottom {
+    flex-direction: column;
   }
 
   .assetMeta {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .assetMeta > div:nth-child(3n) {
-    border-right: 1px solid var(--line);
-    padding-right: 16px;
-  }
-
-  .assetMeta > div:nth-child(2n) {
-    border-right: none;
-    padding-right: 0;
-  }
-
-  .assetMeta > div:nth-child(n + 3) {
-    border-top: 1px solid var(--line);
-  }
-
-  .assetMeta > div:nth-child(n + 4) {
-    border-top: 1px solid var(--line);
   }
 
   .howNums {

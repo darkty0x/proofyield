@@ -254,44 +254,12 @@ export default function LandingPage() {
               <article className={styles.statCardTvl}>
                 <div className={styles.statCardTop}>
                   <span className={styles.statPillDark}>Vault</span>
-                  <span className={styles.statHint}>30d</span>
                 </div>
                 <div className={styles.statValue}>{tvl}</div>
                 <div className={styles.statLabelRow}>
                   <span className={styles.statLabel}>TVL</span>
                   <span className={styles.statHint}>NAV {nav}</span>
                 </div>
-                {history.length > 1 && (
-                  <svg className={styles.statSpark} viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden>
-                    <defs>
-                      <linearGradient id="heroSparkFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="rgba(61,139,255,0.35)" />
-                        <stop offset="100%" stopColor="rgba(61,139,255,0)" />
-                      </linearGradient>
-                    </defs>
-                    {(() => {
-                      const vals = history.map((p) => p.tvl);
-                      const lo = Math.min(...vals);
-                      const hi = Math.max(...vals);
-                      const span = Math.max(hi - lo, 1);
-                      const pts = vals.map((v, i) => {
-                        const x = (i / Math.max(vals.length - 1, 1)) * 160;
-                        const y = 32 - ((v - lo) / span) * 26;
-                        return [x, y] as const;
-                      });
-                      const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
-                      const area = `${line} L160 36 L0 36 Z`;
-                      const [lx, ly] = pts[pts.length - 1];
-                      return (
-                        <>
-                          <path d={area} fill="url(#heroSparkFill)" />
-                          <path d={line} fill="none" stroke="#3d8bff" strokeWidth="2" strokeLinecap="round" />
-                          <circle cx={lx} cy={ly} r="3" fill="#3d8bff" />
-                        </>
-                      );
-                    })()}
-                  </svg>
-                )}
               </article>
             </div>
           </div>
@@ -574,21 +542,33 @@ export default function LandingPage() {
           <div className={styles.coinStage}>
             <div className={styles.coinGlow} aria-hidden />
             <div className={styles.coinPair}>
-              <Image
-                src="/brand/pyusd-coin.png"
-                alt="pyUSD token"
-                width={200}
-                height={200}
-                className={styles.coinImgBack}
-              />
-              <Image
-                src="/brand/pyvusd-coin.png"
-                alt="pyvUSD token"
-                width={260}
-                height={260}
-                className={styles.coinImg}
-                priority
-              />
+              <figure className={styles.coinSlotBack}>
+                <Image
+                  src="/brand/pyusd-coin.png"
+                  alt="pyUSD deposit token"
+                  width={220}
+                  height={220}
+                  className={styles.coinImgBack}
+                />
+                <figcaption className={styles.coinCaption}>
+                  <strong>pyUSD</strong>
+                  <span>Deposit asset</span>
+                </figcaption>
+              </figure>
+              <figure className={styles.coinSlotFront}>
+                <Image
+                  src="/brand/pyvusd-coin.png"
+                  alt="pyvUSD vault share"
+                  width={280}
+                  height={280}
+                  className={styles.coinImg}
+                  priority
+                />
+                <figcaption className={styles.coinCaption}>
+                  <strong>pyvUSD</strong>
+                  <span>Vault share</span>
+                </figcaption>
+              </figure>
             </div>
           </div>
           <div className={styles.assetCopy}>
@@ -691,35 +671,52 @@ export default function LandingPage() {
               <Image src="/brand/proofyield-mark.svg" alt="" width={32} height={32} className={styles.logoMark} />
               ProofYield
             </div>
-            <p className={styles.footerCopy}>© 2026 ProofYield · BUIDL CTC 2026 Fall · DeFi + RWA + AI</p>
-            <p className={styles.footerCopyMuted}>Powered by Creditcoin</p>
+            <p className={styles.footerTag}>
+              Deposit once. Earn RWA yield with Attestcoin proofs on Creditcoin.
+            </p>
           </div>
 
-          <div className={styles.footerRight}>
-            <div className={styles.footerGrid} aria-hidden>
-              {Array.from({ length: 25 }, (_, i) => {
-                // 5×5 X — white cells on black, OKX-style grid mark
-                const on = [0, 4, 6, 8, 12, 16, 18, 20, 24].includes(i);
-                return <span key={i} className={on ? styles.footerCellOn : styles.footerCellOff} />;
-              })}
+          <div className={styles.footerCols}>
+            <div>
+              <h3 className={styles.footerColTitle}>Product</h3>
+              <nav className={styles.footerColLinks}>
+                <Link href="/app">Vault app</Link>
+                <a href="#how">How it works</a>
+                <a href="#compare">Yield</a>
+              </nav>
             </div>
-            <nav className={styles.footerLinks}>
-              <Link href="/app">Vault app</Link>
-              <a href="https://creditcoin.org/" target="_blank" rel="noreferrer">
-                Creditcoin
-              </a>
-              <a href="https://docs.creditcoin.org/creditcoin-usc" target="_blank" rel="noreferrer">
-                Attestcoin docs
-              </a>
-              <a
-                href="https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Hackathon
-              </a>
-            </nav>
+            <div>
+              <h3 className={styles.footerColTitle}>Protocol</h3>
+              <nav className={styles.footerColLinks}>
+                <a href="https://creditcoin.org/" target="_blank" rel="noreferrer">
+                  Creditcoin
+                </a>
+                <a href="https://docs.creditcoin.org/creditcoin-usc" target="_blank" rel="noreferrer">
+                  Attestcoin docs
+                </a>
+                <a href="#usc">Proof model</a>
+              </nav>
+            </div>
+            <div>
+              <h3 className={styles.footerColTitle}>Build</h3>
+              <nav className={styles.footerColLinks}>
+                <a
+                  href="https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  DoraHacks CTC
+                </a>
+                <a href="https://github.com/darkty0x/proofyield" target="_blank" rel="noreferrer">
+                  GitHub
+                </a>
+              </nav>
+            </div>
           </div>
+        </div>
+        <div className={styles.footerBottom}>
+          <span>© 2026 ProofYield · BUIDL CTC 2026 Fall</span>
+          <span>DeFi + RWA + AI · Powered by Creditcoin</span>
         </div>
       </footer>
     </div>
