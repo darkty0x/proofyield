@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 72" fill="none" role="img" aria-label="Creditcoin">
-  <g fill="#111827">
-    <path fill-rule="evenodd" d="M36 10c-12.15 0-22 9.85-22 22s9.85 22 22 22c7.05 0 13.25-3.32 17.2-8.42l-7.35-6.55A12.9 12.9 0 0 1 36 43.1c-6.13 0-11.1-4.97-11.1-11.1S29.87 20.9 36 20.9c3.4 0 6.43 1.53 8.45 3.93l7.55-6.35C48.05 13.45 42.4 10 36 10Z"/>
-    <circle cx="36" cy="32" r="5"/>
-    <rect x="36" y="28.5" width="22" height="7" rx="2.5"/>
-  </g>
-  <text x="76" y="46" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif" font-size="34" font-weight="600" fill="#111827" letter-spacing="-0.025em">Creditcoin</text>
-</svg>

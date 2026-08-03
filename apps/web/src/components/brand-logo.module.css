@@ -1,0 +1,86 @@
+.lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.mark {
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.markGhost {
+  border-radius: 8px;
+}
+
+.word {
+  font-family: var(--font-logo), "Bebas Neue", Impact, sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.22em;
+}
+
+.proof {
+  font-size: 0.72em;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  padding-bottom: 0.06em;
+}
+
+.yield {
+  font-size: 1em;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* L01 — dark */
+.l01 .proof {
+  color: #fff;
+}
+.l01 .yield {
+  color: #3d8bff;
+}
+
+/* L11 — dark gold */
+.l11 .proof {
+  color: #fff;
+}
+.l11 .yield {
+  color: #f0c14a;
+}
+
+/* W01 — light */
+.w01 .proof {
+  color: #0b1220;
+}
+.w01 .yield {
+  color: #3d8bff;
+}
+
+.toggle {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--theme-toggle-fg, rgba(255, 255, 255, 0.75));
+  border: 1px solid var(--theme-toggle-border, rgba(255, 255, 255, 0.14));
+  background: var(--theme-toggle-bg, rgba(255, 255, 255, 0.06));
+  border-radius: 999px;
+  padding: 8px 12px;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.toggle:hover {
+  color: var(--theme-toggle-fg-hover, #fff);
+  background: var(--theme-toggle-bg-hover, rgba(255, 255, 255, 0.1));
+}

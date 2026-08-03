@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { VaultChart } from "./chart";
 import { WalletButton } from "./wallet-button";
+import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
 import styles from "./app.module.css";
 import {
   api,
@@ -113,13 +114,7 @@ export default function VaultAppPage() {
       <div className={styles.bgGlow} aria-hidden />
 
       <header className={styles.topNav}>
-        <Link href="/" className={styles.brand}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/proofyield-mark.svg" alt="" width={30} height={30} />
-          <span className={styles.logoWord}>
-            Proof<span>Yield</span>
-          </span>
-        </Link>
+        <BrandLogo />
 
         <nav className={styles.navLinks}>
           <Link href="/#how">How it works</Link>
@@ -130,6 +125,7 @@ export default function VaultAppPage() {
         </nav>
 
         <div className={styles.topRight}>
+          <ThemeToggle />
           <WalletButton />
         </div>
       </header>
@@ -513,13 +509,7 @@ export default function VaultAppPage() {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <Link href="/" className={styles.footerLogo}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/proofyield-mark.svg" alt="" width={28} height={28} />
-              <span className={styles.logoWord}>
-                Proof<span>Yield</span>
-              </span>
-            </Link>
+            <BrandLogo markSize={28} />
             <p className={styles.footerTag}>
               RWA yield vault with Attestcoin proofs on Creditcoin CC3.
             </p>

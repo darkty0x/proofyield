@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./landing.module.css";
 import { api, formatApy, formatUsd, type HistoryPoint } from "@/lib/api";
+import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
 
 function useReveal() {
   useEffect(() => {
@@ -161,12 +162,7 @@ export default function LandingPage() {
     <div className={styles.page}>
       <header className={styles.nav}>
         <div className={styles.navInner}>
-          <Link href="/" className={styles.logo}>
-            <Image src="/brand/proofyield-mark.svg" alt="" width={30} height={30} className={styles.logoMark} />
-            <span className={styles.logoWord}>
-              Proof<span>Yield</span>
-            </span>
-          </Link>
+          <BrandLogo />
           <nav className={styles.navLinks}>
             <a href="#how">How it works</a>
             <a href="#engines">Strategy</a>
@@ -174,9 +170,12 @@ export default function LandingPage() {
             <a href="#compare">Yield</a>
             <a href="#powered">Infrastructure</a>
           </nav>
-          <Link href="/app" className={styles.navCta}>
-            Start earning
-          </Link>
+          <div className={styles.navRight}>
+            <ThemeToggle />
+            <Link href="/app" className={styles.navCta}>
+              Start earning
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -679,10 +678,7 @@ export default function LandingPage() {
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
             <div className={styles.footerLogo}>
-              <Image src="/brand/proofyield-mark.svg" alt="" width={30} height={30} className={styles.logoMark} />
-              <span className={styles.logoWord}>
-                Proof<span>Yield</span>
-              </span>
+              <BrandLogo />
             </div>
             <p className={styles.footerTag}>
               Deposit once. Earn RWA yield with Attestcoin proofs on Creditcoin.

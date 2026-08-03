@@ -66,11 +66,11 @@
   width: calc(100% - 40px);
   max-width: none;
   margin: 16px auto 0;
-  color: #fff;
-  background: rgba(7, 11, 18, 0.78);
+  color: var(--theme-ink, #fff);
+  background: var(--theme-nav-bg, rgba(7, 11, 18, 0.78));
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--theme-line, rgba(255, 255, 255, 0.1));
   border-radius: 999px;
   box-shadow:
     0 10px 32px rgba(2, 6, 23, 0.28),
@@ -87,11 +87,17 @@
   padding: 10px 14px 10px 22px;
 }
 
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .logo {
-  font-family: var(--font-display), "Helvetica Neue", Helvetica, sans-serif;
   display: inline-flex;
   align-items: center;
-  gap: 11px;
+  gap: 12px;
 }
 
 .logoMark {
@@ -100,14 +106,35 @@
 }
 
 .logoWord {
-  font-size: 19px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
+  font-family: var(--font-logo), "Bebas Neue", Impact, sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
   line-height: 1;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.22em;
+  color: #fff;
 }
 
-.logoWord span {
-  font-weight: 700;
+.proof {
+  font-size: 0.72em;
+  font-style: italic;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  padding-bottom: 0.06em;
+}
+
+.yield {
+  font-size: 1em;
+  font-style: normal;
+  font-weight: 400;
+  color: #3d8bff;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 .navLinks {
@@ -1232,7 +1259,6 @@
 }
 
 .footerLogo {
-  font-family: var(--font-display), "Helvetica Neue", Helvetica, sans-serif;
   color: #fff;
   display: inline-flex;
   align-items: center;
