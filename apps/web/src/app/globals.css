@@ -294,7 +294,7 @@ img {
 html.theme-animating,
 html.theme-animating body,
 html.theme-animating body * {
-  transition-property: background-color, color, border-color, box-shadow, fill, stroke, filter !important;
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke, filter, opacity, transform !important;
   transition-duration: var(--theme-duration) !important;
   transition-timing-function: var(--ease) !important;
 }
@@ -381,6 +381,11 @@ html.theme-animating body * {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
 }
 
 html[data-theme="dark-gold"] .pillars {

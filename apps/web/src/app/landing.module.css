@@ -293,8 +293,8 @@
   height: 52px;
   padding: 6px 8px 6px 24px;
   border-radius: 999px;
-  background: var(--surface);
-  color: #131313;
+  background: #ffffff;
+  color: #101820;
   transition: opacity 0.18s ease, transform 0.18s var(--ease);
 }
 

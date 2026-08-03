@@ -13,12 +13,25 @@ function useReveal() {
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting) e.target.classList.add("in");
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
+      { threshold: 0.08, rootMargin: "0px 0px -4% 0px" },
     );
     nodes.forEach((n) => io.observe(n));
+    // Paint anything already in view immediately (IO can miss first paint).
+    requestAnimationFrame(() => {
+      nodes.forEach((n) => {
+        const rect = n.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) {
+          n.classList.add("in");
+          io.unobserve(n);
+        }
+      });
+    });
     return () => io.disconnect();
   }, []);
 }
