@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import styles from "./landing.module.css";
-import { api, formatApy, formatSupply, formatUsd, type HistoryPoint } from "@/lib/api";
 import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
+import { TransitionLink } from "@/components/transition-link";
 import { useTheme } from "@/components/theme";
+import { api, formatApy, formatSupply, formatUsd, type HistoryPoint } from "@/lib/api";
+import styles from "./landing.module.css";
 
 function useReveal() {
   useEffect(() => {
@@ -223,9 +223,9 @@ export default function LandingPage() {
           </nav>
           <div className={styles.navRight}>
             <ThemeToggle />
-            <Link href="/app" className={styles.navCta}>
+            <TransitionLink href="/app" className={styles.navCta}>
               Start earning
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </header>
@@ -273,12 +273,12 @@ export default function LandingPage() {
                 Attestcoin — no bridges, no centralized oracles, no emission farming.
               </p>
               <div className={styles.ctaRow}>
-                <Link href="/app" className={styles.ctaPrimary}>
+                <TransitionLink href="/app" className={styles.ctaPrimary}>
                   <span>Open vault</span>
                   <span className={styles.ctaArrow} aria-hidden>
                     ↑
                   </span>
-                </Link>
+                </TransitionLink>
                 <a href="#how" className={styles.ctaGhost}>
                   See how it works
                 </a>
@@ -542,12 +542,12 @@ export default function LandingPage() {
               Every coupon observation, Attestcoin proof, and NAV update can be inspected in the vault
               app — share price never moves on faith.
             </p>
-            <Link href="/app" className={styles.glassCta}>
+            <TransitionLink href="/app" className={styles.glassCta}>
               <span>Open vault app</span>
               <span className={styles.ctaArrow} aria-hidden>
                 →
               </span>
-            </Link>
+            </TransitionLink>
           </div>
           <div className={`${styles.transparencyCard} reveal-item`} data-from="right">
             <div className={styles.navLabel}>NAV per share</div>
@@ -674,10 +674,10 @@ export default function LandingPage() {
                 <dd>{nav}</dd>
               </div>
             </dl>
-            <Link href="/app" className={styles.assetCta}>
+            <TransitionLink href="/app" className={styles.assetCta}>
               Mint pyvUSD in the vault
               <span aria-hidden>→</span>
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </section>
@@ -727,9 +727,9 @@ export default function LandingPage() {
           across the CTC ecosystem.
         </p>
         <div className={styles.ctaRow}>
-          <Link href="/app" className={styles.ctaDark}>
+          <TransitionLink href="/app" className={styles.ctaDark}>
             Enter the vault
-          </Link>
+          </TransitionLink>
           <a href="https://creditcoin.org/" target="_blank" rel="noreferrer" className={styles.ctaOutline}>
             Explore Creditcoin
           </a>
@@ -751,7 +751,7 @@ export default function LandingPage() {
             <div>
               <h3 className={styles.footerColTitle}>Product</h3>
               <nav className={styles.footerColLinks}>
-                <Link href="/app">Vault app</Link>
+                <TransitionLink href="/app">Vault app</TransitionLink>
                 <a href="#how">How it works</a>
                 <a href="#compare">Yield</a>
               </nav>

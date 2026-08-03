@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useId } from "react";
 import { THEME_META, useTheme } from "./theme";
+import { TransitionLink } from "./transition-link";
 import styles from "./brand-logo.module.css";
 
 type Props = {
@@ -40,9 +40,9 @@ export function BrandLogo({ href = "/", markSize = 30, className, onDark }: Prop
 
   if (href) {
     return (
-      <Link href={href} className={`${styles.lock} ${className ?? ""}`}>
+      <TransitionLink href={href} className={`${styles.lock} ${className ?? ""}`}>
         {inner}
-      </Link>
+      </TransitionLink>
     );
   }
   return <div className={`${styles.lock} ${className ?? ""}`}>{inner}</div>;

@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { VaultChart } from "./chart";
 import { WalletButton } from "./wallet-button";
 import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
+import { TransitionLink } from "@/components/transition-link";
 import styles from "./app.module.css";
 import {
   api,
@@ -253,11 +253,11 @@ export default function VaultAppPage() {
         <BrandLogo />
 
         <nav className={styles.navLinks}>
-          <Link href="/#how">How it works</Link>
-          <Link href="/#engines">Strategy</Link>
-          <Link href="/#markets">Markets</Link>
-          <Link href="/#compare">Yield</Link>
-          <Link href="/#powered">Infrastructure</Link>
+          <TransitionLink href="/#how">How it works</TransitionLink>
+          <TransitionLink href="/#engines">Strategy</TransitionLink>
+          <TransitionLink href="/#markets">Markets</TransitionLink>
+          <TransitionLink href="/#compare">Yield</TransitionLink>
+          <TransitionLink href="/#powered">Infrastructure</TransitionLink>
         </nav>
 
         <div className={styles.topRight}>
@@ -777,13 +777,13 @@ export default function VaultAppPage() {
                 <a href="https://docs.creditcoin.org/creditcoin-usc" target="_blank" rel="noreferrer">
                   Attestcoin docs
                 </a>
-                <Link href="/#usc">Proof model</Link>
+                <TransitionLink href="/#usc">Proof model</TransitionLink>
               </nav>
             </div>
             <div>
               <h3 className={styles.footerColTitle}>Build</h3>
               <nav className={styles.footerColLinks}>
-                <Link href="/">Marketing site</Link>
+                <TransitionLink href="/">Marketing site</TransitionLink>
                 <a href="https://github.com/darkty0x/proofyield" target="_blank" rel="noreferrer">
                   GitHub
                 </a>
