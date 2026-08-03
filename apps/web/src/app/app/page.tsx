@@ -24,6 +24,38 @@ type Action = "deposit" | "withdraw";
 
 const FILTERS = ["all", "harvested", "attested", "pending", "attesting", "rejected"] as const;
 
+const FILTER_LABELS: Record<(typeof FILTERS)[number], string> = {
+  all: "All",
+  harvested: "Harvested",
+  attested: "Attested",
+  pending: "Pending",
+  attesting: "Attesting",
+  rejected: "Rejected",
+};
+
+function proofTitle(p: ProofItem): string {
+  const meta = p.coupon.metadata?.split("·")[0]?.trim();
+  return meta || `Source ${p.coupon.sourceId}`;
+}
+
+function formatWhen(iso: string): string {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return "—";
+  const sec = Math.max(0, Math.floor((Date.now() - t) / 1000));
+  if (sec < 60) return "just now";
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 48) return `${hr}h ago`;
+  return `${Math.floor(hr / 24)}d ago`;
+}
+
+function shortTx(h?: string | null): string {
+  if (!h) return "—";
+  if (h.length < 14) return h;
+  return `${h.slice(0, 8)}…${h.slice(-6)}`;
+}
+
 const ALLOC_ART: Record<string, string> = {
   "T-Bill Proxy Desk": "/brand/crystal/crystal-equities.jpg",
   "Trade Finance Invoice Pool": "/brand/crystal/crystal-engine-funding.jpg",
@@ -159,6 +191,7 @@ export default function VaultAppPage() {
   const [query, setQuery] = useState("");
   const [amount, setAmount] = useState("1000");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [allocOpenId, setAllocOpenId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
@@ -219,6 +252,16 @@ export default function VaultAppPage() {
       return hay.includes(q);
     });
   }, [proofs, filter, query]);
+
+  const openSource = useMemo(
+    () => sources.find((s) => s.sourceId === allocOpenId) ?? null,
+    [sources, allocOpenId],
+  );
+
+  const openSourceProofs = useMemo(() => {
+    if (allocOpenId == null) return [];
+    return proofs.filter((p) => p.coupon.sourceId === allocOpenId);
+  }, [proofs, allocOpenId]);
 
   async function run(fn: () => Promise<unknown>, okMsg: string) {
     setBusy(true);
@@ -613,74 +656,152 @@ export default function VaultAppPage() {
         ) : null}
 
         {tab === "proofs" ? (
-          <section className={styles.panelWide}>
-            <div className={styles.toolbar}>
-              <input
-                className={styles.search}
-                placeholder="Filter by tx, metadata, source…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <div className={styles.chips}>
+          <section className={styles.proofs}>
+            <header className={styles.proofsHead}>
+              <div>
+                <h1 className={styles.proofsTitle}>Proofs</h1>
+                <p className={styles.proofsLead}>
+                  Coupon events verified through Attestcoin before harvest.
+                </p>
+              </div>
+              <div className={styles.proofsCount}>
+                <span className={styles.proofsCountN}>{displayProofs.length}</span>
+                <span className={styles.proofsCountL}>shown</span>
+              </div>
+            </header>
+
+            <div className={styles.proofsTools}>
+              <label className={styles.proofsSearch}>
+                <span className={styles.srOnly}>Search proofs</span>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search source, tx, or note…"
+                />
+              </label>
+              <div className={styles.proofsSeg} role="tablist" aria-label="Proof status">
                 {FILTERS.map((f) => (
                   <button
                     key={f}
                     type="button"
-                    className={filter === f ? styles.chipOn : styles.chip}
+                    role="tab"
+                    aria-selected={filter === f}
+                    className={filter === f ? styles.proofsSegOn : styles.proofsSegBtn}
                     onClick={() => setFilter(f)}
                   >
-                    {f}
+                    {FILTER_LABELS[f]}
                   </button>
                 ))}
               </div>
             </div>
-            <div className={styles.table}>
-              <div className={styles.thead}>
+
+            <div className={styles.proofsLedger}>
+              <div className={styles.proofsCols} aria-hidden>
+                <span>Source</span>
                 <span>Coupon</span>
-                <span>Amount</span>
+                <span className={styles.proofsEnd}>Amount</span>
                 <span>Status</span>
-                <span>Updated</span>
+                <span className={styles.proofsEnd}>Updated</span>
               </div>
+
               {displayProofs.length === 0 ? (
-                <div className={styles.empty}>No proofs match this filter.</div>
+                <div className={styles.proofsEmpty}>No proofs match this view.</div>
               ) : (
                 displayProofs.map((p) => {
                   const open = openId === p.id;
+                  const sepoliaHref = p.coupon.sepoliaTxHash
+                    ? `${explorers.sepolia}/tx/${p.coupon.sepoliaTxHash}`
+                    : null;
+                  const harvestHref = p.harvest?.ctcTxHash
+                    ? `${explorers.ctc}/tx/${p.harvest.ctcTxHash}`
+                    : null;
                   return (
-                    <div key={p.id} className={styles.tblock}>
+                    <article
+                      key={p.id}
+                      className={`${styles.proofsRow} ${open ? styles.proofsRowOpen : ""}`}
+                    >
                       <button
                         type="button"
-                        className={styles.trow}
+                        className={styles.proofsHit}
+                        aria-expanded={open}
                         onClick={() => setOpenId(open ? null : p.id)}
                       >
-                        <span>
-                          Source {p.coupon.sourceId} · #{p.coupon.couponId}
+                        <span className={styles.proofsSource}>
+                          <strong>{proofTitle(p)}</strong>
+                          <em>SRC {p.coupon.sourceId}</em>
                         </span>
-                        <span className={styles.mono}>{formatUsd(p.coupon.amount)}</span>
-                        <span className={`${styles.status} ${styles[`st_${p.status}`] ?? ""}`}>
-                          {p.status}
+                        <span className={styles.mono}>#{p.coupon.couponId}</span>
+                        <span className={`${styles.mono} ${styles.proofsEnd}`}>
+                          {formatUsd(p.coupon.amount)}
                         </span>
-                        <span className={styles.muted}>{new Date(p.updatedAt).toLocaleString()}</span>
+                        <span className={`${styles.proofsSt} ${styles[`pst_${p.status}`] ?? ""}`}>
+                          <i aria-hidden />
+                          {FILTER_LABELS[p.status as Exclude<(typeof FILTERS)[number], "all">] ??
+                            p.status}
+                        </span>
+                        <span className={`${styles.proofsWhen} ${styles.proofsEnd}`}>
+                          <time dateTime={p.updatedAt}>{formatWhen(p.updatedAt)}</time>
+                          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+                            <path
+                              d={open ? "M2.5 7.5L6 4l3.5 3.5" : "M2.5 4.5L6 8l3.5-3.5"}
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
                       </button>
+
                       {open ? (
-                        <div className={styles.detail}>
-                          <p>{p.decision?.rationale}</p>
-                          <p>
-                            <span className={styles.muted}>Sepolia </span>
-                            <span className={styles.mono}>{p.coupon.sepoliaTxHash}</span>
-                          </p>
-                          {p.harvest?.ctcTxHash ? (
-                            <p>
-                              <span className={styles.muted}>Harvest </span>
-                              <span className={styles.mono}>{p.harvest.ctcTxHash}</span>
-                              {p.harvest.sharePriceAfter != null
-                                ? ` · NAV ${p.harvest.sharePriceAfter.toFixed(6)}`
-                                : ""}
-                            </p>
+                        <div className={styles.proofsDetail}>
+                          {p.decision?.rationale ? (
+                            <p className={styles.proofsRationale}>{p.decision.rationale}</p>
                           ) : null}
+                          <dl className={styles.proofsMeta}>
+                            <div>
+                              <dt>Sepolia</dt>
+                              <dd>
+                                {sepoliaHref ? (
+                                  <a href={sepoliaHref} target="_blank" rel="noreferrer">
+                                    {shortTx(p.coupon.sepoliaTxHash)}
+                                  </a>
+                                ) : (
+                                  <span className={styles.mono}>{shortTx(p.coupon.sepoliaTxHash)}</span>
+                                )}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Harvest</dt>
+                              <dd>
+                                {harvestHref ? (
+                                  <a href={harvestHref} target="_blank" rel="noreferrer">
+                                    {shortTx(p.harvest?.ctcTxHash)}
+                                  </a>
+                                ) : (
+                                  <span className={styles.muted}>—</span>
+                                )}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Risk</dt>
+                              <dd className={styles.mono}>
+                                {p.decision?.riskScore != null ? p.decision.riskScore : "—"}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>NAV after</dt>
+                              <dd className={styles.mono}>
+                                {p.harvest?.sharePriceAfter != null
+                                  ? p.harvest.sharePriceAfter.toFixed(4)
+                                  : "—"}
+                              </dd>
+                            </div>
+                          </dl>
                         </div>
                       ) : null}
-                    </div>
+                    </article>
                   );
                 })
               )}
@@ -689,54 +810,145 @@ export default function VaultAppPage() {
         ) : null}
 
         {tab === "allocator" ? (
-          <section className={styles.allocGrid}>
-            {sources.map((s) => {
-              const art =
-                ALLOC_ART[s.name] ??
-                TRANCHE_ART[s.tranche] ??
-                "/brand/crystal/crystal-hold.jpg";
-              return (
-                <article key={s.sourceId} className={styles.allocCard} aria-readonly="true">
-                  <div className={styles.allocMedia}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={art} alt="" className={styles.allocImg} draggable={false} />
-                    <div className={styles.allocMediaTop}>
-                      <div className={styles.allocId}>SRC {s.sourceId}</div>
-                      <div className={styles.status}>{s.active ? "active" : "paused"}</div>
+          <section className={styles.alloc}>
+            <header className={styles.allocHead}>
+              <div>
+                <h1 className={styles.allocTitle}>Allocator</h1>
+                <p className={styles.allocLead}>
+                  AI target weights across RWA desks. Open a source for details.
+                </p>
+              </div>
+            </header>
+
+            <div className={styles.allocGrid}>
+              {sources.map((s) => {
+                const art =
+                  ALLOC_ART[s.name] ??
+                  TRANCHE_ART[s.tranche] ??
+                  "/brand/crystal/crystal-hold.jpg";
+                const selected = allocOpenId === s.sourceId;
+                return (
+                  <button
+                    key={s.sourceId}
+                    type="button"
+                    className={`${styles.allocCard} ${selected ? styles.allocCardOn : ""}`}
+                    aria-pressed={selected}
+                    onClick={() =>
+                      setAllocOpenId((cur) => (cur === s.sourceId ? null : s.sourceId))
+                    }
+                  >
+                    <div className={styles.allocMedia}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={art} alt="" className={styles.allocImg} draggable={false} />
+                      <div className={styles.allocMediaTop}>
+                        <div className={styles.allocId}>SRC {s.sourceId}</div>
+                        <div className={styles.status}>{s.active ? "active" : "paused"}</div>
+                      </div>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/brand/pyvusd-flat.png"
+                        alt=""
+                        width={48}
+                        height={48}
+                        className={styles.allocCoin}
+                        draggable={false}
+                      />
                     </div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src="/brand/pyvusd-flat.png"
-                      alt=""
-                      width={48}
-                      height={48}
-                      className={styles.allocCoin}
-                      draggable={false}
-                    />
-                  </div>
-                  <div className={styles.allocBody}>
-                    <h2>{s.name}</h2>
-                    <dl className={styles.allocDl}>
-                      <div>
-                        <dt>Tranche</dt>
-                        <dd>{s.tranche}</dd>
+                    <div className={styles.allocBody}>
+                      <h2>{s.name}</h2>
+                      <dl className={styles.allocDl}>
+                        <div>
+                          <dt>Tranche</dt>
+                          <dd>{s.tranche}</dd>
+                        </div>
+                        <div>
+                          <dt>Risk</dt>
+                          <dd>{s.riskBps} bps</dd>
+                        </div>
+                        <div>
+                          <dt>Weight</dt>
+                          <dd>{(s.targetWeightBps / 100).toFixed(1)}%</dd>
+                        </div>
+                      </dl>
+                      <div className={styles.barTrack}>
+                        <div
+                          className={styles.barFill}
+                          style={{ width: `${s.targetWeightBps / 100}%` }}
+                        />
                       </div>
-                      <div>
-                        <dt>Risk</dt>
-                        <dd>{s.riskBps} bps</dd>
-                      </div>
-                      <div>
-                        <dt>Weight</dt>
-                        <dd>{(s.targetWeightBps / 100).toFixed(1)}%</dd>
-                      </div>
-                    </dl>
-                    <div className={styles.barTrack}>
-                      <div className={styles.barFill} style={{ width: `${s.targetWeightBps / 100}%` }} />
+                      <span className={styles.allocOpenHint}>
+                        {selected ? "Close details" : "View details"}
+                      </span>
                     </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {openSource ? (
+              <aside className={styles.allocDetail} aria-live="polite">
+                <div className={styles.allocDetailTop}>
+                  <div>
+                    <div className={styles.allocDetailEyebrow}>SRC {openSource.sourceId}</div>
+                    <h2 className={styles.allocDetailTitle}>{openSource.name}</h2>
+                    <p className={styles.allocDetailLead}>
+                      Target sleeve in the AI allocator. Weights are policy outputs — not
+                      editable from this desk.
+                    </p>
                   </div>
-                </article>
-              );
-            })}
+                  <button
+                    type="button"
+                    className={styles.allocDetailClose}
+                    onClick={() => setAllocOpenId(null)}
+                  >
+                    Close
+                  </button>
+                </div>
+
+                <dl className={styles.allocDetailGrid}>
+                  <div>
+                    <dt>Tranche</dt>
+                    <dd>{openSource.tranche}</dd>
+                  </div>
+                  <div>
+                    <dt>Risk band</dt>
+                    <dd className={styles.mono}>{openSource.riskBps} bps</dd>
+                  </div>
+                  <div>
+                    <dt>Target weight</dt>
+                    <dd className={styles.mono}>{(openSource.targetWeightBps / 100).toFixed(1)}%</dd>
+                  </div>
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{openSource.active ? "Active" : "Paused"}</dd>
+                  </div>
+                  <div>
+                    <dt>Est. sleeve TVL</dt>
+                    <dd className={styles.mono}>
+                      {formatUsd(((status?.tvl ?? 0) * openSource.targetWeightBps) / 10_000)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Related proofs</dt>
+                    <dd className={styles.mono}>{openSourceProofs.length}</dd>
+                  </div>
+                </dl>
+
+                <div className={styles.allocDetailActions}>
+                  <button
+                    type="button"
+                    className={styles.allocDetailPrimary}
+                    onClick={() => {
+                      setQuery(String(openSource.sourceId));
+                      setFilter("all");
+                      setTab("proofs");
+                    }}
+                  >
+                    Open related proofs
+                  </button>
+                </div>
+              </aside>
+            ) : null}
           </section>
         ) : null}
       </main>
