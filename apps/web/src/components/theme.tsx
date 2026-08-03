@@ -22,7 +22,11 @@ const ORDER: ThemeId[] = ["dark", "dark-gold", "light"];
 const STORAGE_KEY = "proofyield-theme";
 
 function applyTheme(theme: ThemeId) {
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  // Force style recalc so CSS var transitions run cleanly
+  root.classList.add("theme-animating");
+  window.setTimeout(() => root.classList.remove("theme-animating"), 480);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

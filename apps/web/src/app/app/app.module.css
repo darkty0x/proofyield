@@ -6,6 +6,9 @@
   overflow-x: clip;
   display: flex;
   flex-direction: column;
+  transition:
+    background-color var(--theme-duration, 0.45s) var(--ease),
+    color var(--theme-duration, 0.45s) var(--ease);
 }
 
 .bgGlow {
@@ -13,10 +16,11 @@
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 45% at 15% -10%, rgba(56, 132, 255, 0.22), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 90% 10%, rgba(80, 180, 255, 0.12), transparent 50%),
-    radial-gradient(ellipse 40% 30% at 50% 100%, rgba(40, 90, 180, 0.14), transparent 55%);
+    radial-gradient(ellipse 70% 45% at 15% -10%, var(--glow-a), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 90% 10%, var(--glow-b), transparent 50%),
+    radial-gradient(ellipse 40% 30% at 50% 100%, var(--glow-a), transparent 55%);
   z-index: 0;
+  transition: opacity var(--theme-duration, 0.45s) var(--ease);
 }
 
 .topNav {
@@ -36,9 +40,11 @@
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--theme-line, rgba(255, 255, 255, 0.1));
   border-radius: 999px;
-  box-shadow:
-    0 10px 32px rgba(2, 6, 23, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  box-shadow: var(--card-shadow);
+  transition:
+    background-color var(--theme-duration, 0.45s) var(--ease),
+    border-color var(--theme-duration, 0.45s) var(--ease),
+    box-shadow var(--theme-duration, 0.45s) var(--ease);
 }
 
 .brand {
@@ -89,7 +95,7 @@
   gap: 28px;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--nav-link);
 }
 
 .navLinks a {
@@ -149,8 +155,8 @@
   height: 42px;
   padding: 0 22px;
   border-radius: 999px;
-  background: #fff;
-  color: #131313;
+  background: var(--cta-bg);
+  color: var(--cta-fg);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -762,7 +768,7 @@
 .allocCard {
   padding: 0;
   overflow: hidden;
-  background: #0c121c;
+  background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.1);
   min-height: 420px;
   display: flex;
@@ -773,7 +779,7 @@
   position: relative;
   height: 180px;
   overflow: hidden;
-  background: #081018;
+  background: var(--surface-2);
 }
 
 .allocImg {
@@ -924,7 +930,7 @@
   position: relative;
   z-index: 1;
   margin-top: auto;
-  background: #050505;
+  background: var(--footer-bg);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 

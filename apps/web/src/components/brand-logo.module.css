@@ -8,6 +8,7 @@
 .mark {
   border-radius: 8px;
   flex-shrink: 0;
+  transition: opacity 0.35s var(--ease, ease), filter 0.45s var(--ease, ease);
 }
 
 .markGhost {
@@ -33,6 +34,7 @@
   letter-spacing: 0.06em;
   line-height: 1;
   padding-bottom: 0.06em;
+  transition: color 0.4s var(--ease, ease);
 }
 
 .yield {
@@ -41,6 +43,7 @@
   font-weight: 400;
   letter-spacing: 0.04em;
   line-height: 1;
+  transition: color 0.4s var(--ease, ease);
 }
 
 /* L01 — dark */
@@ -48,7 +51,7 @@
   color: #fff;
 }
 .l01 .yield {
-  color: #3d8bff;
+  color: var(--blue, #3d8bff);
 }
 
 /* L11 — dark gold */
@@ -56,7 +59,7 @@
   color: #fff;
 }
 .l11 .yield {
-  color: #f0c14a;
+  color: var(--gold, #f0c14a);
 }
 
 /* W01 — light */
@@ -64,23 +67,51 @@
   color: #0b1220;
 }
 .w01 .yield {
-  color: #3d8bff;
+  color: var(--blue, #3d8bff);
 }
 
-.toggle {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--theme-toggle-fg, rgba(255, 255, 255, 0.75));
+.toggleGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
   border: 1px solid var(--theme-toggle-border, rgba(255, 255, 255, 0.14));
   background: var(--theme-toggle-bg, rgba(255, 255, 255, 0.06));
-  border-radius: 999px;
-  padding: 8px 12px;
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.4s var(--ease, ease),
+    border-color 0.4s var(--ease, ease);
 }
 
-.toggle:hover {
+.toggleBtn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--theme-toggle-fg, rgba(255, 255, 255, 0.65));
+  transition:
+    color 0.3s var(--ease, ease),
+    background-color 0.35s var(--ease, ease),
+    transform 0.25s var(--ease, ease);
+}
+
+.toggleBtn:hover {
   color: var(--theme-toggle-fg-hover, #fff);
   background: var(--theme-toggle-bg-hover, rgba(255, 255, 255, 0.1));
+}
+
+.toggleOn {
+  color: var(--theme-toggle-active-fg, #070b12);
+  background: var(--theme-toggle-active-bg, #fff);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+}
+
+.toggleOn:hover {
+  color: var(--theme-toggle-active-fg, #070b12);
+  background: var(--theme-toggle-active-bg, #fff);
+}
+
+.toggleBtn svg {
+  display: block;
 }

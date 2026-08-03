@@ -1,5 +1,10 @@
 .page {
   width: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  transition:
+    background-color var(--theme-duration, 0.45s) var(--ease),
+    color var(--theme-duration, 0.45s) var(--ease);
 }
 
 .heroFrame {
@@ -25,8 +30,8 @@
   gap: 10px;
   padding: 0 4%;
   background:
-    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(61, 139, 255, 0.22), transparent 55%),
-    radial-gradient(ellipse 50% 50% at 20% 80%, rgba(40, 100, 200, 0.18), transparent 50%),
+    radial-gradient(ellipse 80% 60% at 70% 20%, var(--glow-a), transparent 55%),
+    radial-gradient(ellipse 50% 50% at 20% 80%, var(--glow-b), transparent 50%),
     linear-gradient(160deg, #050a14 0%, #0a1220 45%, #071018 100%);
 }
 
@@ -72,9 +77,12 @@
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--theme-line, rgba(255, 255, 255, 0.1));
   border-radius: 999px;
-  box-shadow:
-    0 10px 32px rgba(2, 6, 23, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  box-shadow: var(--card-shadow);
+  transition:
+    background-color var(--theme-duration, 0.45s) var(--ease),
+    border-color var(--theme-duration, 0.45s) var(--ease),
+    color var(--theme-duration, 0.45s) var(--ease),
+    box-shadow var(--theme-duration, 0.45s) var(--ease);
 }
 
 .navInner {
@@ -142,7 +150,7 @@
   gap: 28px;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--nav-link);
 }
 
 .navLinks a {
@@ -150,7 +158,7 @@
 }
 
 .navLinks a:hover {
-  color: #fff;
+  color: var(--ink);
 }
 
 .navCta {
@@ -159,8 +167,8 @@
   height: 42px;
   padding: 0 22px;
   border-radius: 999px;
-  background: #fff;
-  color: #131313;
+  background: var(--cta-bg);
+  color: var(--cta-fg);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -285,7 +293,7 @@
   height: 52px;
   padding: 6px 8px 6px 24px;
   border-radius: 999px;
-  background: #fff;
+  background: var(--surface);
   color: #131313;
   transition: opacity 0.18s ease, transform 0.18s var(--ease);
 }
@@ -370,7 +378,7 @@
   right: 0;
   bottom: 8px;
   z-index: 2;
-  background: #fff;
+  background: var(--surface);
   box-shadow:
     0 0 0 1px rgba(16, 24, 32, 0.04),
     0 32px 56px rgba(2, 6, 23, 0.34),
@@ -636,7 +644,7 @@
   height: 48px;
   padding: 0 22px;
   border-radius: 999px;
-  background: #fff;
+  background: var(--surface);
   color: #131313;
   font-size: 12px;
   font-weight: 600;
@@ -719,7 +727,7 @@
 .marqueeWrap {
   overflow: hidden;
   border-bottom: 1px solid var(--line);
-  background: #e6ecf5;
+  background: var(--bg-deep);
   padding: 18px 0;
 }
 
@@ -771,7 +779,7 @@
   min-height: 140px;
   padding: 32px 28px;
   border-radius: 20px;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 12px 36px rgba(16, 24, 32, 0.05);
   text-align: left;
   transition: transform 0.25s var(--ease);
@@ -976,7 +984,7 @@
   height: 48px;
   padding: 0 22px;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--cta-bg);
   color: #fff;
   font-size: 14px;
   font-weight: 600;
@@ -1217,7 +1225,7 @@
 
 .footer {
   margin-top: 80px;
-  background: #050505;
+  background: var(--footer-bg);
   color: rgba(255, 255, 255, 0.55);
 }
 
@@ -1331,7 +1339,7 @@
 .miniPill {
   border: 1px solid var(--line);
   color: var(--muted);
-  background: #f3f6fb;
+  background: var(--surface-2);
   margin-bottom: 12px;
 }
 
@@ -1402,7 +1410,7 @@
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid rgba(61, 139, 255, 0.28);
   color: var(--ink-soft);
   font-family: var(--font-mono), ui-monospace, Menlo, monospace;
@@ -1423,7 +1431,7 @@
 }
 
 .howCard {
-  background: #fff;
+  background: var(--surface);
   border-radius: 22px;
   padding: 24px 22px 18px;
   display: flex;
@@ -1456,7 +1464,7 @@
   margin-top: auto;
   border-radius: 16px;
   overflow: hidden;
-  background: #eef2f8;
+  background: var(--bg);
   aspect-ratio: 1;
 }
 
@@ -1523,7 +1531,7 @@
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
   gap: 12px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 20px;
   padding: 16px;
   box-shadow: 0 10px 30px rgba(16, 24, 32, 0.04);
@@ -1550,7 +1558,7 @@
 .engineArt {
   border-radius: 14px;
   overflow: hidden;
-  background: #eef2f8;
+  background: var(--bg);
   min-height: 120px;
 }
 
@@ -1584,7 +1592,7 @@
   width: 140px;
   padding: 18px 14px;
   border-radius: 18px;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   text-align: center;
   box-shadow: 0 0 0 8px rgba(61, 139, 255, 0.06), 0 18px 40px rgba(16, 24, 32, 0.08);
@@ -1706,7 +1714,7 @@
 }
 
 .marketCard {
-  background: #fff;
+  background: var(--surface);
   border-radius: 22px;
   overflow: hidden;
   box-shadow: 0 12px 36px rgba(16, 24, 32, 0.05);
@@ -1719,7 +1727,7 @@
 
 .marketArt {
   aspect-ratio: 16 / 10;
-  background: #eef2f8;
+  background: var(--bg);
   overflow: hidden;
 }
 
@@ -1790,7 +1798,7 @@
 }
 
 .transparencyCard {
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   border-radius: 22px;
   padding: 28px 26px 22px;
@@ -1862,7 +1870,7 @@
   align-items: center;
   padding: 18px 20px;
   border-radius: 18px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .compareBarHot {
@@ -1879,7 +1887,7 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: #eef2f8;
+  background: var(--bg);
   display: grid;
   place-items: center;
   overflow: hidden;
