@@ -1,0 +1,727 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import styles from "./landing.module.css";
+import { api, formatApy, formatUsd, type HistoryPoint } from "@/lib/api";
+
+function useReveal() {
+  useEffect(() => {
+    const nodes = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) e.target.classList.add("in");
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
+    );
+    nodes.forEach((n) => io.observe(n));
+    return () => io.disconnect();
+  }, []);
+}
+
+const POWERED = [
+  {
+    name: "Creditcoin",
+    href: "https://creditcoin.org/",
+    src: "/brand/partners/creditcoin-wordmark.png",
+    wide: true,
+    blurb: "L1 for cross-chain builders",
+  },
+  {
+    name: "Attestcoin",
+    href: "https://docs.creditcoin.org/creditcoin-usc",
+    src: "/brand/partners/attestcoin.svg",
+    wide: true,
+    blurb: "Decentralized oracle / USC",
+  },
+  {
+    name: "Credit Labs",
+    href: "https://creditcoin.org/Fund",
+    src: "/brand/partners/creditlabs.svg",
+    wide: true,
+    blurb: "CEIP ecosystem fund",
+  },
+  {
+    name: "DoraHacks",
+    href: "https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail",
+    src: "/brand/partners/dorahacks.svg",
+    wide: true,
+    blurb: "BUIDL CTC 2026 Fall",
+  },
+  {
+    name: "Gluwa",
+    href: "https://www.gluwa.com/",
+    src: "/brand/partners/gluwa-wordmark.png",
+    wide: true,
+    blurb: "Creditcoin technology",
+  },
+];
+
+function NavSpark({ points }: { points: HistoryPoint[] }) {
+  const d = useMemo(() => {
+    const pts = points.length
+      ? points.map((p) => p.sharePrice)
+      : [1, 1.0012, 1.0021, 1.0034, 1.0048];
+    const min = Math.min(...pts);
+    const max = Math.max(...pts);
+    const span = Math.max(max - min, 0.0004);
+    const line = pts
+      .map((v, i) => {
+        const x = (i / Math.max(pts.length - 1, 1)) * 280;
+        const y = 72 - ((v - min) / span) * 56;
+        return `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+      })
+      .join(" ");
+    const lastX = 280;
+    const lastY = 72 - ((pts[pts.length - 1] - min) / span) * 56;
+    const area = `${line} L${lastX.toFixed(1)} 80 L0 80 Z`;
+    return { line, area, lastX, lastY };
+  }, [points]);
+
+  return (
+    <svg className={styles.navSpark} viewBox="0 0 280 80" fill="none" aria-hidden>
+      <defs>
+        <linearGradient id="navStroke" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#3d8bff" />
+          <stop offset="100%" stopColor="#8fd3ff" />
+        </linearGradient>
+        <linearGradient id="navFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(61, 139, 255, 0.28)" />
+          <stop offset="100%" stopColor="rgba(61, 139, 255, 0)" />
+        </linearGradient>
+      </defs>
+      <path d={d.area} fill="url(#navFill)" />
+      <path
+        d={d.line}
+        stroke="url(#navStroke)"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx={d.lastX} cy={d.lastY} r="3.5" fill="#3d8bff" />
+    </svg>
+  );
+}
+
+export default function LandingPage() {
+  const [apy, setApy] = useState("8.42%");
+  const [tvl, setTvl] = useState("$1.26M");
+  const [nav, setNav] = useState("1.0048");
+  const [supply, setSupply] = useState("10.00M");
+  const [updatedAgo, setUpdatedAgo] = useState("just now");
+  const [history, setHistory] = useState<HistoryPoint[]>([]);
+  useReveal();
+
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const [s, h] = await Promise.all([api.status(), api.history(30)]);
+        if (!alive) return;
+        setApy(formatApy(s.promisedApyBps ?? s.apyBps));
+        setTvl(formatUsd(s.tvl));
+        setNav(s.sharePrice.toFixed(4));
+        setHistory(h.items);
+        if (s.tokenSupply) {
+          setSupply(
+            s.tokenSupply >= 1_000_000
+              ? `${(s.tokenSupply / 1_000_000).toFixed(2)}M`
+              : s.tokenSupply.toLocaleString(),
+          );
+        }
+        if (s.lastSuccessAt) {
+          const sec = Math.max(0, Math.round((Date.now() - new Date(s.lastSuccessAt).getTime()) / 1000));
+          setUpdatedAgo(sec < 60 ? `${sec}s ago` : `${Math.floor(sec / 60)}m ago`);
+        } else {
+          setUpdatedAgo("live");
+        }
+      } catch {
+        /* keep seeded defaults */
+      }
+    };
+    void load();
+    const t = setInterval(() => void load(), 12_000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, []);
+
+  const compareRows = [
+    { name: "ProofYield pyvUSD", tags: ["RWA", "ATTESTCOIN"], rate: apy, bar: 100, hot: true },
+    { name: "US Treasuries", tags: ["TRADFI"], rate: "4.3%", bar: 51, hot: false },
+    { name: "Fintech savings", tags: ["TRADFI"], rate: "4.0%", bar: 47, hot: false },
+    { name: "Banks", tags: ["TRADFI"], rate: "0.4%", bar: 8, hot: false },
+  ];
+
+  return (
+    <div className={styles.page}>
+      <header className={styles.nav}>
+        <div className={styles.navInner}>
+          <Link href="/" className={styles.logo}>
+            <Image src="/brand/proofyield-mark.svg" alt="" width={28} height={28} className={styles.logoMark} />
+            ProofYield
+          </Link>
+          <nav className={styles.navLinks}>
+            <a href="#how">How it works</a>
+            <a href="#engines">Strategy</a>
+            <a href="#markets">Markets</a>
+            <a href="#compare">Yield</a>
+            <a href="#powered">Powered by</a>
+          </nav>
+          <Link href="/app" className={styles.navCta}>
+            Start earning
+          </Link>
+        </div>
+      </header>
+
+      <div className={styles.heroFrame}>
+        <section className={styles.hero}>
+          <div className={styles.pillars} aria-hidden>
+            {Array.from({ length: 9 }).map((_, i) => (
+              <span
+                key={i}
+                className={styles.pillar}
+                style={{
+                  animationDelay: `${i * 0.35}s`,
+                  ["--glow" as string]: i % 2 === 0 ? "0.55" : "0.28",
+                }}
+              />
+            ))}
+            <div className={styles.heroVeil} />
+          </div>
+
+          <div className={styles.heroInner}>
+            <div className={styles.heroCopy}>
+              <div className={styles.partnerRow}>
+                <span className={styles.partnerLive}>
+                  <i />
+                  <Image
+                    src="/brand/creditcoin.png"
+                    alt=""
+                    width={16}
+                    height={16}
+                    className={styles.partnerIcon}
+                  />
+                  Attestcoin · live on Creditcoin CC3
+                </span>
+                <span className={styles.partner}>RWA · DeFi · AI</span>
+              </div>
+              <h1 className={styles.h1}>
+                Deposit once.
+                <br />
+                <em>Read every proof.</em>
+              </h1>
+              <p className={styles.sub}>
+                ProofYield is the RWA yield vault for Creditcoin. An AI allocator routes capital to
+                real-world coupons. Share price only moves after Sepolia cashflows are verified by
+                Attestcoin — no bridges, no centralized oracles, no emission farming.
+              </p>
+              <div className={styles.ctaRow}>
+                <Link href="/app" className={styles.ctaPrimary}>
+                  <span>Open vault</span>
+                  <span className={styles.ctaArrow} aria-hidden>
+                    ↑
+                  </span>
+                </Link>
+                <a href="#how" className={styles.ctaGhost}>
+                  See how it works
+                </a>
+              </div>
+            </div>
+
+            <div className={styles.statUnion} aria-label="Live vault metrics">
+              <article className={styles.statCardApy}>
+                <div className={styles.statCardTop}>
+                  <span className={styles.statPill}>Promised</span>
+                  <span className={styles.statLive}>
+                    <i /> Live
+                  </span>
+                </div>
+                <div className={styles.statValue}>{apy}</div>
+                <div className={styles.statLabelRow}>
+                  <span className={styles.statLabel}>APY</span>
+                  <span className={styles.statHint}>RWA coupons · Attestcoin-gated</span>
+                </div>
+                <div className={styles.statBar} aria-hidden>
+                  <span style={{ width: "84%" }} />
+                </div>
+              </article>
+
+              <article className={styles.statCardTvl}>
+                <div className={styles.statCardTop}>
+                  <span className={styles.statPillDark}>Vault</span>
+                  <span className={styles.statHint}>30d</span>
+                </div>
+                <div className={styles.statValue}>{tvl}</div>
+                <div className={styles.statLabelRow}>
+                  <span className={styles.statLabel}>TVL</span>
+                  <span className={styles.statHint}>NAV {nav}</span>
+                </div>
+                {history.length > 1 && (
+                  <svg className={styles.statSpark} viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden>
+                    <defs>
+                      <linearGradient id="heroSparkFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="rgba(61,139,255,0.35)" />
+                        <stop offset="100%" stopColor="rgba(61,139,255,0)" />
+                      </linearGradient>
+                    </defs>
+                    {(() => {
+                      const vals = history.map((p) => p.tvl);
+                      const lo = Math.min(...vals);
+                      const hi = Math.max(...vals);
+                      const span = Math.max(hi - lo, 1);
+                      const pts = vals.map((v, i) => {
+                        const x = (i / Math.max(vals.length - 1, 1)) * 160;
+                        const y = 32 - ((v - lo) / span) * 26;
+                        return [x, y] as const;
+                      });
+                      const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+                      const area = `${line} L160 36 L0 36 Z`;
+                      const [lx, ly] = pts[pts.length - 1];
+                      return (
+                        <>
+                          <path d={area} fill="url(#heroSparkFill)" />
+                          <path d={line} fill="none" stroke="#3d8bff" strokeWidth="2" strokeLinecap="round" />
+                          <circle cx={lx} cy={ly} r="3" fill="#3d8bff" />
+                        </>
+                      );
+                    })()}
+                  </svg>
+                )}
+              </article>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* HOW IT WORKS — Atoma-style crystal cards */}
+      <section className={`${styles.section} ${styles.centerHead} reveal`} id="how">
+        <h2 className={styles.h2Center}>Deposit once. Earn with proofs.</h2>
+        <p className={styles.leadCenter}>
+          Deposit pyUSD, let Attestcoin-gated RWA coupons raise NAV, and redeem shares anytime at live
+          price — no bridge trust required.
+        </p>
+        <div className={styles.howNums}>
+          {["1", "2", "3"].map((n) => (
+            <div key={n} className={styles.howNum}>
+              {n}
+            </div>
+          ))}
+        </div>
+        <div className={styles.howGrid}>
+          {[
+            {
+              t: "Mint pyvUSD",
+              d: "Deposit pyUSD, receive ERC-4626 vault shares at the current NAV.",
+              img: "/brand/crystal/crystal-mint.jpg",
+            },
+            {
+              t: "Hold & accrue",
+              d: "AI routes coupons. Attestcoin proofs clear on CC3. Every accepted harvest lifts share price.",
+              img: "/brand/crystal/crystal-hold.jpg",
+            },
+            {
+              t: "Redeem anytime",
+              d: "Burn pyvUSD for pyUSD at live NAV. Proven yield stays in the vault accounting.",
+              img: "/brand/crystal/crystal-redeem.jpg",
+            },
+          ].map((c) => (
+            <article key={c.t} className={styles.howCard}>
+              <h3>{c.t}</h3>
+              <p>{c.d}</p>
+              <div className={styles.howArt}>
+                <Image src={c.img} alt="" width={420} height={420} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* STRATEGY ENGINES */}
+      <section className={`${styles.sectionWide} reveal`} id="engines">
+        <div className={styles.enginesHead}>
+          <div>
+            <h2 className={styles.h2}>Three engines, one proven vault</h2>
+          </div>
+          <span className={styles.livePill}>
+            <i /> Live · updates {updatedAgo}
+          </span>
+        </div>
+        <div className={styles.enginesFlow}>
+          <div className={styles.engineStack}>
+            {[
+              {
+                n: "01",
+                t: "RWA coupons",
+                d: "T-bill proxies, invoice pools, receivables emit CouponPaid on Sepolia.",
+                img: "/brand/crystal/crystal-engine-funding.jpg",
+              },
+              {
+                n: "02",
+                t: "AI allocator",
+                d: "Risk scores, TVL caps, and desk weights accept or reject each coupon.",
+                img: "/brand/crystal/crystal-engine-stat.jpg",
+              },
+              {
+                n: "03",
+                t: "Attestcoin proofs",
+                d: "Inclusion proofs verify on Creditcoin — fake coupons never reach NAV.",
+                img: "/brand/crystal/crystal-engine-points.jpg",
+              },
+            ].map((e) => (
+              <article key={e.n} className={styles.engineCard}>
+                <div className={styles.engineCopy}>
+                  <span className={styles.miniPill}>Engine {e.n}</span>
+                  <h3>{e.t}</h3>
+                  <p>{e.d}</p>
+                </div>
+                <div className={styles.engineArt}>
+                  <Image src={e.img} alt="" width={520} height={220} />
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className={styles.engineMid} aria-hidden>
+            <div className={styles.engineLines} />
+            <div className={styles.engineNode}>
+              <div className={styles.nodeGlyph}>&lt;/&gt;</div>
+              <div className={styles.nodeLabel}>Attestcoin</div>
+            </div>
+          </div>
+
+          <aside className={styles.engineResult}>
+            <div className={styles.engineResultTop}>
+              <Image
+                src="/brand/pyvusd-coin.png"
+                alt=""
+                width={44}
+                height={44}
+                className={styles.engineCoin}
+              />
+              <div>
+                <div className={styles.engineResultLabel}>Promised APY</div>
+                <div className={styles.engineResultSub}>Paid into NAV in pyUSD</div>
+              </div>
+            </div>
+            <div className={styles.engineApy}>{apy}</div>
+            <div className={styles.engineStats}>
+              <div>
+                <span>TVL</span>
+                <strong>{tvl}</strong>
+              </div>
+              <div>
+                <span>Supply</span>
+                <strong>{supply}</strong>
+              </div>
+              <div>
+                <span>NAV</span>
+                <strong>{nav}</strong>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      {/* RWA MARKETS */}
+      <section className={`${styles.section} ${styles.centerHead} reveal`} id="markets">
+        <h2 className={styles.h2Center}>
+          Allocating across <em>real cashflow</em> markets
+        </h2>
+        <div className={styles.marketGrid}>
+          {[
+            {
+              t: "Treasuries",
+              d: "T-bill proxy desk",
+              img: "/brand/crystal/crystal-equities.jpg",
+            },
+            {
+              t: "Trade finance",
+              d: "Invoice pools",
+              img: "/brand/crystal/crystal-commodities.jpg",
+            },
+            {
+              t: "Receivables",
+              d: "Emerging-market cashflows",
+              img: "/brand/crystal/crystal-fx.jpg",
+            },
+          ].map((m) => (
+            <article key={m.t} className={styles.marketCard}>
+              <div className={styles.marketArt}>
+                <Image src={m.img} alt="" width={640} height={360} />
+              </div>
+              <h3>{m.t}</h3>
+              <p>{m.d}</p>
+            </article>
+          ))}
+        </div>
+        <p className={styles.marketFoot}>AI-weighted across desks — only Attestcoin-proven coupons accrue</p>
+      </section>
+
+      {/* POWERED BY */}
+      <section className={`${styles.section} ${styles.centerHead} reveal`} id="powered">
+        <h2 className={styles.h2Center}>Built on Creditcoin infrastructure</h2>
+        <p className={styles.leadCenter}>
+          The vault executes on Creditcoin CC3 with Attestcoin proofs, aiming for Credit Labs CEIP
+          after BUIDL CTC 2026 Fall.
+        </p>
+        <div className={styles.poweredFeature}>
+          {POWERED.slice(0, 2).map((p) => (
+            <a key={p.name} href={p.href} target="_blank" rel="noreferrer" className={styles.poweredCard}>
+              <Image
+                src={p.src}
+                alt={p.name}
+                width={220}
+                height={56}
+                className={styles.poweredLogo}
+              />
+              <div className={styles.logoBlurb}>{p.blurb}</div>
+            </a>
+          ))}
+        </div>
+        <div className={styles.poweredStrip}>
+          {POWERED.map((p) => (
+            <a key={p.name} href={p.href} target="_blank" rel="noreferrer" className={styles.stripItem}>
+              <Image
+                src={p.src}
+                alt={p.name}
+                width={180}
+                height={44}
+                className={styles.stripLogo}
+              />
+            </a>
+          ))}
+        </div>
+      </section>
+
+      {/* TRANSPARENCY */}
+      <section className={`${styles.section} reveal`} id="transparency">
+        <div className={styles.transparency}>
+          <div className={styles.transparencyCopy}>
+            <h2 className={styles.h2Light}>Transparency</h2>
+            <p className={styles.leadLight}>
+              Every coupon observation, Attestcoin proof, and NAV update can be inspected in the vault
+              app — share price never moves on faith.
+            </p>
+            <Link href="/app" className={styles.glassCta}>
+              <span>Open vault app</span>
+              <span className={styles.ctaArrow} aria-hidden>
+                →
+              </span>
+            </Link>
+          </div>
+          <div className={styles.transparencyCard}>
+            <div className={styles.navLabel}>NAV per share</div>
+            <div className={styles.navValueBig}>
+              {nav}
+              <small>pyUSD</small>
+            </div>
+            <NavSpark points={history} />
+            <div className={styles.navUpdate}>Last update {updatedAgo}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* COMPARE */}
+      <section className={`${styles.section} reveal`} id="compare">
+        <div className={styles.compareHead}>
+          <div>
+            <h2 className={styles.h2}>Stable yield — built to beat the bank.</h2>
+          </div>
+          <p className={styles.lead}>
+            Hands-free RWA yield on Creditcoin. The vault compounds only after Attestcoin clears a
+            coupon — {apy} promised target on {tvl} TVL from a {supply} pyUSD test supply.
+          </p>
+        </div>
+        <div className={styles.compareBars}>
+          {compareRows.map((row) => (
+            <div key={row.name} className={`${styles.compareBarRow} ${row.hot ? styles.compareBarHot : ""}`}>
+              <div className={styles.compareLeft}>
+                <div className={styles.compareIcon}>
+                  {row.hot ? (
+                    <Image src="/brand/pyvusd-coin.png" alt="" width={28} height={28} />
+                  ) : (
+                    <span />
+                  )}
+                </div>
+                <div>
+                  <div className={styles.compareName}>{row.name}</div>
+                  <div className={styles.compareTags}>
+                    {row.tags.map((t) => (
+                      <span key={t}>{t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className={styles.barViz}>
+                <div className={styles.barFillWide} style={{ width: `${row.bar}%` }} />
+              </div>
+              <div className={styles.compareRate}>{row.rate}</div>
+            </div>
+          ))}
+        </div>
+        <div className={styles.compareBanner}>✦ Proven yield only</div>
+        <p className={styles.marketFoot}>RWA DESKS ON SEPOLIA · PROOFS ON CREDITCOIN CC3 · UPDATES LIVE</p>
+      </section>
+
+      {/* ASSET + ATTESTCOIN brief */}
+      <section className={`${styles.section} reveal`} id="asset">
+        <div className={styles.assetGrid}>
+          <div className={styles.coinStage}>
+            <div className={styles.coinGlow} aria-hidden />
+            <div className={styles.coinPair}>
+              <Image
+                src="/brand/pyusd-coin.png"
+                alt="pyUSD token"
+                width={200}
+                height={200}
+                className={styles.coinImgBack}
+              />
+              <Image
+                src="/brand/pyvusd-coin.png"
+                alt="pyvUSD token"
+                width={260}
+                height={260}
+                className={styles.coinImg}
+                priority
+              />
+            </div>
+          </div>
+          <div className={styles.assetCopy}>
+            <h2 className={styles.assetTitle}>
+              <span className={styles.assetSymbol}>pyvUSD</span>
+              <span className={styles.assetSub}>ProofYield vault share</span>
+            </h2>
+            <p className={styles.assetLead}>
+              Deposit <strong>pyUSD</strong>, mint <strong>pyvUSD</strong> ERC-4626 shares at live NAV.
+              Holdings compound only when Attestcoin-proven RWA coupons accrue into the vault.
+            </p>
+            <dl className={styles.assetMeta}>
+              <div>
+                <dt>Symbol</dt>
+                <dd>pyvUSD</dd>
+              </div>
+              <div>
+                <dt>Standard</dt>
+                <dd>ERC-4626</dd>
+              </div>
+              <div>
+                <dt>pyUSD supply</dt>
+                <dd>{supply}</dd>
+              </div>
+              <div>
+                <dt>Promised APY</dt>
+                <dd>{apy}</dd>
+              </div>
+              <div>
+                <dt>TVL</dt>
+                <dd>{tvl}</dd>
+              </div>
+              <div>
+                <dt>NAV</dt>
+                <dd>{nav}</dd>
+              </div>
+            </dl>
+            <Link href="/app" className={styles.assetCta}>
+              Mint pyvUSD in the vault
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className={`${styles.section} reveal`} id="usc">
+        <div className={styles.sectionHead}>
+          <h2 className={styles.h2}>No bridges. No oracles. Synchronous proofs.</h2>
+          <p className={styles.lead}>
+            Same model Creditcoin ships on{" "}
+            <a href="https://creditcoin.org/" target="_blank" rel="noreferrer">
+              creditcoin.org
+            </a>{" "}
+            — foreign-chain inclusion verified cryptographically on CC3.
+          </p>
+        </div>
+        <div className={styles.feature3}>
+          {[
+            {
+              t: "No bridges. No oracles.",
+              d: "Bridges concentrate risk. Centralized oracles can be corrupted. Attestcoin distributes trust.",
+            },
+            {
+              t: "Synchronous verification",
+              d: "Once attested, proofs verify in the same Creditcoin transaction — about one block (~15s).",
+            },
+            {
+              t: "Built for RWA yield",
+              d: "ProofYield gates every NAV increase on Sepolia→CC3 inclusion proofs.",
+            },
+          ].map((f) => (
+            <article key={f.t} className={styles.featureCard}>
+              <h3>{f.t}</h3>
+              <p>{f.d}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={`${styles.section} ${styles.finalCta} reveal`}>
+        <h2 className={styles.h2}>Launch into Creditcoin — not a void.</h2>
+        <p className={styles.lead}>
+          Deposit, prove, and earn on the L1 built for cross-chain builders. Then compose pyvUSD
+          across the CTC ecosystem.
+        </p>
+        <div className={styles.ctaRow}>
+          <Link href="/app" className={styles.ctaDark}>
+            Enter the vault
+          </Link>
+          <a href="https://creditcoin.org/" target="_blank" rel="noreferrer" className={styles.ctaOutline}>
+            Explore Creditcoin
+          </a>
+        </div>
+      </section>
+
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <div className={styles.footerBrand}>
+            <div className={styles.footerLogo}>
+              <Image src="/brand/proofyield-mark.svg" alt="" width={32} height={32} className={styles.logoMark} />
+              ProofYield
+            </div>
+            <p className={styles.footerCopy}>© 2026 ProofYield · BUIDL CTC 2026 Fall · DeFi + RWA + AI</p>
+            <p className={styles.footerCopyMuted}>Powered by Creditcoin</p>
+          </div>
+
+          <div className={styles.footerRight}>
+            <div className={styles.footerGrid} aria-hidden>
+              {Array.from({ length: 25 }, (_, i) => {
+                // 5×5 X — white cells on black, OKX-style grid mark
+                const on = [0, 4, 6, 8, 12, 16, 18, 20, 24].includes(i);
+                return <span key={i} className={on ? styles.footerCellOn : styles.footerCellOff} />;
+              })}
+            </div>
+            <nav className={styles.footerLinks}>
+              <Link href="/app">Vault app</Link>
+              <a href="https://creditcoin.org/" target="_blank" rel="noreferrer">
+                Creditcoin
+              </a>
+              <a href="https://docs.creditcoin.org/creditcoin-usc" target="_blank" rel="noreferrer">
+                Attestcoin docs
+              </a>
+              <a
+                href="https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Hackathon
+              </a>
+            </nav>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

@@ -1,0 +1,23 @@
+{
+  "name": "proofyield",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ProofYield — Attestcoin-proven RWA yield vault on Creditcoin",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @proofyield/agent && npm run build -w @proofyield/web",
+    "build:contracts": "cd contracts && forge build",
+    "test:contracts": "cd contracts && forge test",
+    "test:agent": "npm run test -w @proofyield/agent",
+    "dev:web": "npm run dev -w @proofyield/web",
+    "dev:agent": "npm run dev -w @proofyield/agent",
+    "start:agent": "npm run start -w @proofyield/agent",
+    "lint": "npm run lint -w @proofyield/web --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
