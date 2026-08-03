@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" fill="none" role="img" aria-label="DoraHacks">
-  <rect width="64" height="64" rx="14" fill="currentColor"/>
+  <rect width="64" height="64" rx="14" fill="#111827"/>
   <path d="M16 34c0-10 8-18 18-18s18 8 18 18" stroke="#7CFFB2" stroke-width="5" stroke-linecap="round" fill="none"/>
   <circle cx="34" cy="36" r="7" fill="#7CFFB2"/>
-  <text x="78" y="42" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="30" font-weight="700" fill="currentColor" letter-spacing="-0.03em">DoraHacks</text>
+  <text x="78" y="42" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="30" font-weight="700" fill="#111827" letter-spacing="-0.03em">DoraHacks</text>
 </svg>
