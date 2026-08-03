@@ -881,10 +881,12 @@ html[data-theme="dark-gold"] .statPillDark {
 
 /* Partner marks are dark artwork — force light on dark/gold themes.
    (SVG currentColor does not apply when loaded via <img>.) */
-html[data-theme="dark"] .poweredLogo,
-html[data-theme="dark"] .stripLogo,
-html[data-theme="dark-gold"] .poweredLogo,
-html[data-theme="dark-gold"] .stripLogo {
+:global(html[data-theme="dark"]) .poweredLogo,
+:global(html[data-theme="dark"]) .stripLogo,
+:global(html[data-theme="dark-gold"]) .poweredLogo,
+:global(html[data-theme="dark-gold"]) .stripLogo,
+:global(html[data-theme="dark"]) .logoOnDark,
+:global(html[data-theme="dark-gold"]) .logoOnDark {
   filter: brightness(0) invert(1);
 }
 
@@ -1964,9 +1966,10 @@ html[data-theme="dark-gold"] .navCta {
 }
 
 .compareIcon img {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
   display: block;
 }
 
@@ -1977,6 +1980,9 @@ html[data-theme="dark-gold"] .navCta {
 
 .compareBarHot .compareIcon img {
   border-radius: 50%;
+  object-fit: contain;
+  width: 28px;
+  height: 28px;
 }
 
 .compareTags {
@@ -1992,8 +1998,8 @@ html[data-theme="dark-gold"] .navCta {
   text-transform: uppercase;
   padding: 3px 8px;
   border-radius: 999px;
-  border: 1px solid var(--line);
-  color: var(--muted);
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  color: var(--ink-soft);
 }
 
 .barViz {

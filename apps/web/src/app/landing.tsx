@@ -41,7 +41,6 @@ const POWERED = [
     name: "Creditcoin",
     href: "https://creditcoin.org/",
     src: "/brand/partners/creditcoin-wordmark.png",
-    raster: true,
     wide: true,
     blurb: "L1 for cross-chain builders",
   },
@@ -49,7 +48,6 @@ const POWERED = [
     name: "Attestcoin",
     href: "https://docs.creditcoin.org/creditcoin-usc",
     src: "/brand/partners/attestcoin.svg",
-    raster: false,
     wide: true,
     blurb: "Decentralized oracle / USC",
   },
@@ -57,7 +55,6 @@ const POWERED = [
     name: "Credit Labs",
     href: "https://creditcoin.org/Fund",
     src: "/brand/partners/creditlabs.svg",
-    raster: false,
     wide: true,
     blurb: "CEIP ecosystem fund",
   },
@@ -65,7 +62,6 @@ const POWERED = [
     name: "DoraHacks",
     href: "https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail",
     src: "/brand/partners/dorahacks.svg",
-    raster: false,
     wide: true,
     blurb: "BUIDL CTC 2026 Fall",
   },
@@ -73,7 +69,6 @@ const POWERED = [
     name: "Gluwa",
     href: "https://www.gluwa.com/",
     src: "/brand/partners/gluwa-wordmark.png",
-    raster: true,
     wide: true,
     blurb: "Creditcoin technology",
   },
@@ -184,7 +179,7 @@ export default function LandingPage() {
       rate: "4.3%",
       bar: 51,
       hot: false,
-      icon: "/brand/icons/treasury.svg",
+      icon: "/brand/crystal/crystal-equities.jpg",
     },
     {
       name: "Fintech savings",
@@ -192,7 +187,7 @@ export default function LandingPage() {
       rate: "4.0%",
       bar: 47,
       hot: false,
-      icon: "/brand/icons/fintech.svg",
+      icon: "/brand/crystal/crystal-engine-funding.jpg",
     },
     {
       name: "Banks",
@@ -200,7 +195,7 @@ export default function LandingPage() {
       rate: "0.4%",
       bar: 8,
       hot: false,
-      icon: "/brand/icons/banks.svg",
+      icon: "/brand/crystal/crystal-engine-stat.jpg",
     },
   ];
 
@@ -492,7 +487,7 @@ export default function LandingPage() {
                 alt={p.name}
                 width={220}
                 height={56}
-                className={`${styles.poweredLogo} ${p.raster ? styles.logoRaster : ""}`}
+                className={`${styles.poweredLogo} ${styles.logoOnDark}`}
               />
               <div className={styles.logoBlurb}>{p.blurb}</div>
             </a>
@@ -506,7 +501,7 @@ export default function LandingPage() {
                 alt={p.name}
                 width={180}
                 height={44}
-                className={`${styles.stripLogo} ${p.raster ? styles.logoRaster : ""}`}
+                className={`${styles.stripLogo} ${styles.logoOnDark}`}
               />
             </a>
           ))}
