@@ -366,7 +366,7 @@ export default function LandingPage() {
           <aside className={styles.engineResult}>
             <div className={styles.engineResultTop}>
               <Image
-                src="/brand/pyvusd-flat.png"
+                src="/brand/pyvusd-mark.svg"
                 alt=""
                 width={44}
                 height={44}
@@ -487,7 +487,7 @@ export default function LandingPage() {
             <div className={styles.navLabel}>NAV per share</div>
             <div className={styles.navValueBig}>
               <Image
-                src="/brand/pyvusd-flat.png"
+                src="/brand/pyvusd-mark.svg"
                 alt=""
                 width={40}
                 height={40}
@@ -521,7 +521,7 @@ export default function LandingPage() {
               <div className={styles.compareLeft}>
                 <div className={styles.compareIcon}>
                   {row.hot ? (
-                    <Image src="/brand/pyvusd-flat.png" alt="" width={28} height={28} />
+                    <Image src="/brand/pyvusd-mark.svg" alt="" width={28} height={28} />
                   ) : (
                     <span />
                   )}

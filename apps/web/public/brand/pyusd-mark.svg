@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="pyUSD">
+  <circle cx="16" cy="16" r="16" fill="#3D8BFF"/>
+  <circle cx="16" cy="16" r="9.2" stroke="#fff" stroke-width="3.1"/>
+  <rect x="14.05" y="4.2" width="3.9" height="23.6" rx="1.95" fill="#fff"/>
+</svg>

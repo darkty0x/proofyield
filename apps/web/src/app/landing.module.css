@@ -1887,21 +1887,30 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: var(--bg);
+  background: var(--surface-2);
   display: grid;
   place-items: center;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .compareIcon img {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  display: block;
+}
+
+.compareBarHot .compareIcon {
+  background: rgba(240, 193, 74, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(240, 193, 74, 0.35);
 }
 
 .compareIcon span {
   width: 14px;
   height: 14px;
   border-radius: 4px;
-  background: rgba(16, 24, 32, 0.15);
+  background: var(--line);
 }
 
 .compareTags {

@@ -158,13 +158,13 @@ export default function VaultAppPage() {
             <section className={styles.vaultInfo}>
               <div className={styles.vaultHead}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/pyvusd-flat.png" alt="" width={48} height={48} className={styles.vaultCoin} />
+                <img src="/brand/pyvusd-mark.svg" alt="" width={48} height={48} className={styles.vaultCoin} />
                 <div>
                   <h1 className={styles.vaultTitle}>ProofYield RWA Vault</h1>
                   <div className={styles.badges}>
                     <span className={styles.badge}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/brand/pyvusd-flat.png" alt="" width={14} height={14} />
+                      <img src="/brand/pyvusd-mark.svg" alt="" width={14} height={14} />
                       {share}
                     </span>
                     <span className={styles.badge}>
@@ -309,12 +309,12 @@ export default function VaultAppPage() {
               <form onSubmit={onSubmit}>
                 <div className={styles.assetRow}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/brand/pyusd-flat.png" alt="" width={22} height={22} />
+                  <img src="/brand/pyusd-mark.svg" alt="" width={22} height={22} />
                   <span>
                     {asset} → {share}
                   </span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/brand/pyvusd-flat.png" alt="" width={22} height={22} />
+                  <img src="/brand/pyvusd-mark.svg" alt="" width={22} height={22} />
                 </div>
 
                 <label className={styles.amountLabel}>Amount</label>
@@ -472,7 +472,7 @@ export default function VaultAppPage() {
                     </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/brand/pyvusd-flat.png"
+                      src="/brand/pyvusd-mark.svg"
                       alt=""
                       width={40}
                       height={40}
