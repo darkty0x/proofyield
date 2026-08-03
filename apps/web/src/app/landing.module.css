@@ -1482,15 +1482,12 @@
   display: grid;
   place-items: center;
   background: var(--surface);
-  border: 1px solid rgba(61, 139, 255, 0.28);
+  border: 1px solid color-mix(in srgb, var(--blue) 35%, transparent);
   color: var(--ink-soft);
   font-family: var(--font-mono), ui-monospace, Menlo, monospace;
   font-size: 16px;
   font-weight: 500;
-  box-shadow:
-    0 0 0 10px rgba(61, 139, 255, 0.1),
-    0 0 0 18px rgba(61, 139, 255, 0.05),
-    0 12px 28px rgba(16, 24, 32, 0.08);
+  box-shadow: 0 8px 20px rgba(16, 24, 32, 0.08);
 }
 
 .howGrid {
