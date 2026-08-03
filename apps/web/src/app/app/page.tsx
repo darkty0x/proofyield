@@ -275,13 +275,13 @@ export default function VaultAppPage() {
                   </p>
                   <ul className={styles.strategyList}>
                     <li>
-                      <span className={styles.ic}>①</span> Observe CouponPaid
+                      <span className={styles.ic}>1</span> Observe CouponPaid
                     </li>
                     <li>
-                      <span className={styles.ic}>②</span> Attest on CC3
+                      <span className={styles.ic}>2</span> Attest on CC3
                     </li>
                     <li>
-                      <span className={styles.ic}>③</span> Verify + accrue
+                      <span className={styles.ic}>3</span> Verify + accrue
                     </li>
                   </ul>
                 </article>
