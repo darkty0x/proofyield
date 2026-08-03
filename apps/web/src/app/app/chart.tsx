@@ -102,12 +102,12 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
       <svg className={styles.svg} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden>
         <defs>
           <linearGradient id={`chartFill-${gid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(56, 132, 255, 0.35)" />
-            <stop offset="100%" stopColor="rgba(56, 132, 255, 0)" />
+            <stop offset="0%" stopColor="var(--chart-fill)" />
+            <stop offset="100%" stopColor="transparent" />
           </linearGradient>
           <linearGradient id={`chartStroke-${gid}`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#5aa2ff" />
-            <stop offset="100%" stopColor="#8fd3ff" />
+            <stop offset="0%" stopColor="var(--blue)" />
+            <stop offset="100%" stopColor="var(--chart-line)" />
           </linearGradient>
           <filter id={`glow-${gid}`} x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="2.5" result="b" />
@@ -151,7 +151,7 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
             cx={coords[coords.length - 1][0]}
             cy={coords[coords.length - 1][1]}
             r="4.5"
-            fill="#8fd3ff"
+            fill="var(--chart-line)"
           />
         )}
       </svg>
