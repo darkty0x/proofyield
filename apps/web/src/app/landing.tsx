@@ -552,33 +552,24 @@ export default function LandingPage() {
           <div className={styles.coinStage}>
             <div className={styles.coinGlow} aria-hidden />
             <div className={styles.coinPair}>
-              <figure className={styles.coinSlotBack}>
-                <Image
-                  src="/brand/pyusd-coin.png"
-                  alt="pyUSD deposit token"
-                  width={220}
-                  height={220}
-                  className={styles.coinImgBack}
-                />
-                <figcaption className={styles.coinCaption}>
+              <Image
+                src="/brand/tokens-pair.png"
+                alt="pyUSD and pyvUSD"
+                width={840}
+                height={560}
+                className={styles.coinPairImg}
+                priority
+              />
+              <div className={styles.coinCaptions}>
+                <div className={styles.coinCaption}>
                   <strong>pyUSD</strong>
                   <span>Deposit asset</span>
-                </figcaption>
-              </figure>
-              <figure className={styles.coinSlotFront}>
-                <Image
-                  src="/brand/pyvusd-coin.png"
-                  alt="pyvUSD vault share"
-                  width={280}
-                  height={280}
-                  className={styles.coinImg}
-                  priority
-                />
-                <figcaption className={styles.coinCaption}>
+                </div>
+                <div className={styles.coinCaption}>
                   <strong>pyvUSD</strong>
                   <span>Vault share</span>
-                </figcaption>
-              </figure>
+                </div>
+              </div>
             </div>
           </div>
           <div className={styles.assetCopy}>
