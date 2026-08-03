@@ -121,29 +121,37 @@ export default function VaultAppPage() {
           </span>
         </Link>
 
-        <nav className={styles.menu}>
-          {(
-            [
-              ["vault", "Vault"],
-              ["proofs", "Proofs"],
-              ["allocator", "Allocator"],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              className={`${styles.menuItem} ${tab === id ? styles.menuOn : ""}`}
-              onClick={() => setTab(id)}
-            >
-              {label}
-            </button>
-          ))}
+        <nav className={styles.navLinks}>
+          <Link href="/#how">How it works</Link>
+          <Link href="/#engines">Strategy</Link>
+          <Link href="/#markets">Markets</Link>
+          <Link href="/#compare">Yield</Link>
+          <Link href="/#powered">Infrastructure</Link>
         </nav>
 
         <div className={styles.topRight}>
           <WalletButton />
         </div>
       </header>
+
+      <nav className={styles.appTabs} aria-label="App sections">
+        {(
+          [
+            ["vault", "Vault"],
+            ["proofs", "Proofs"],
+            ["allocator", "Allocator"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            className={`${styles.menuItem} ${tab === id ? styles.menuOn : ""}`}
+            onClick={() => setTab(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
 
       <main className={styles.main}>
         {error ? <div className={styles.bannerErr}>{error}</div> : null}

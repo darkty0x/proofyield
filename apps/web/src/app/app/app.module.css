@@ -54,7 +54,7 @@
 }
 
 .logoWord {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1;
@@ -64,14 +64,34 @@
   font-weight: 700;
 }
 
-.menu {
+.navLinks {
+  display: flex;
+  gap: 28px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.navLinks a {
+  transition: color 0.15s ease;
+}
+
+.navLinks a:hover {
+  color: #fff;
+}
+
+.appTabs {
+  position: relative;
+  z-index: 2;
   display: flex;
   gap: 4px;
+  width: fit-content;
+  max-width: calc(100% - 40px);
+  margin: 18px auto 0;
   padding: 4px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  margin: 0 auto;
 }
 
 .menuItem {
@@ -96,7 +116,6 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  margin-left: auto;
 }
 
 .walletWrap {
@@ -107,14 +126,15 @@
 }
 
 .walletBtn {
-  height: 40px;
-  padding: 0 18px;
+  height: 42px;
+  padding: 0 22px;
   border-radius: 999px;
-  background: #3d8bff;
-  color: #fff;
-  font-size: 13px;
+  background: #fff;
+  color: #131313;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
@@ -848,8 +868,12 @@
     gap: 12px;
   }
 
-  .topRight {
-    margin-left: 0;
+  .navLinks {
+    display: none;
+  }
+
+  .appTabs {
+    max-width: calc(100% - 32px);
   }
 
   .vaultLayout,
