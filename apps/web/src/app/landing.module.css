@@ -404,21 +404,21 @@
   animation: float-y 6s ease-in-out 1s infinite alternate-reverse;
 }
 
-html[data-theme="dark-gold"] .statCardTvl {
+:global(html[data-theme="dark-gold"]) .statCardTvl {
   background: linear-gradient(165deg, #1a1408 0%, #241c0e 100%);
   border-color: rgba(240, 193, 74, 0.28);
   color: #f7f1e4;
 }
 
-html[data-theme="dark-gold"] .statCardTvl .statLabel {
+:global(html[data-theme="dark-gold"]) .statCardTvl .statLabel {
   color: rgba(247, 241, 228, 0.78);
 }
 
-html[data-theme="dark-gold"] .statCardTvl .statHint {
+:global(html[data-theme="dark-gold"]) .statCardTvl .statHint {
   color: rgba(247, 241, 228, 0.55);
 }
 
-html[data-theme="dark-gold"] .statPillDark {
+:global(html[data-theme="dark-gold"]) .statPillDark {
   background: #f0c14a;
   color: #1a1408;
 }
@@ -1262,9 +1262,9 @@ html[data-theme="dark-gold"] .statPillDark {
   text-transform: uppercase;
 }
 
-html[data-theme="dark-gold"] .ctaDark,
-html[data-theme="dark-gold"] .assetCta,
-html[data-theme="dark-gold"] .navCta {
+:global(html[data-theme="dark-gold"]) .ctaDark,
+:global(html[data-theme="dark-gold"]) .assetCta,
+:global(html[data-theme="dark-gold"]) .navCta {
   background: #f0c14a;
   color: #1a1408;
 }
