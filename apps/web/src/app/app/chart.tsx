@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useId, useMemo, useRef, useState, type PointerEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent,
+} from "react";
 import { formatUsd, type HistoryPoint } from "@/lib/api";
 import styles from "./chart.module.css";
 
@@ -23,7 +31,8 @@ function formatAxisY(metric: "tvl" | "sharePrice", v: number): string {
   const abs = Math.abs(v);
   if (abs >= 1_000_000) return `$${(v / 1_000_000).toFixed(2)}M`;
   if (abs >= 1_000) return `$${(v / 1_000).toFixed(1)}K`;
-  return `$${v.toFixed(0)}`;
+  if (abs >= 1) return `$${v.toFixed(0)}`;
+  return `$${v.toFixed(2)}`;
 }
 
 function formatDate(iso: string): string {
@@ -42,24 +51,53 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
   const gid = useId().replace(/:/g, "");
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<number | null>(null);
+  // Match container aspect so the plot fills the card edge-to-edge (no letterbox).
+  const [box, setBox] = useState({ w: 720, h: 260 });
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const apply = (width: number, height: number) => {
+      if (width < 40 || height < 40) return;
+      setBox((prev) =>
+        Math.abs(prev.w - width) < 1 && Math.abs(prev.h - height) < 1
+          ? prev
+          : { w: Math.round(width), h: Math.round(height) },
+      );
+    };
+    apply(el.clientWidth, el.clientHeight);
+    const ro = new ResizeObserver((entries) => {
+      const cr = entries[0]?.contentRect;
+      if (!cr) return;
+      apply(cr.width, cr.height);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const chart = useMemo(() => {
     if (points.length === 0) return null;
 
     const values = points.map((p) => (metric === "tvl" ? p.tvl : p.sharePrice));
-    const min = Math.min(...values);
-    const max = Math.max(...values);
+    const minRaw = Math.min(...values);
+    const maxRaw = Math.max(...values);
+    // Pad flat series so a single-point / zero portfolio still draws in the plot.
+    const pad =
+      metric === "tvl"
+        ? Math.max(maxRaw * 0.04, 50)
+        : Math.max(Math.abs(maxRaw) * 0.002, 0.0005);
+    const min = minRaw === maxRaw ? Math.max(0, minRaw - pad) : minRaw;
+    const max = minRaw === maxRaw ? maxRaw + pad : maxRaw;
     const span = Math.max(max - min, metric === "tvl" ? 1 : 0.0001);
 
-    const w = 640;
-    const h = 240;
-    // Room for Y labels (left) and X labels (bottom).
-    const padL = 56;
-    const padR = 16;
-    const padT = 14;
-    const padB = 32;
-    const plotW = w - padL - padR;
-    const plotH = h - padT - padB;
+    const w = box.w;
+    const h = box.h;
+    const padL = w < 480 ? 44 : 56;
+    const padR = 12;
+    const padT = 18;
+    const padB = 28;
+    const plotW = Math.max(w - padL - padR, 1);
+    const plotH = Math.max(h - padT - padB, 1);
 
     const coords = values.map((v, i) => {
       const x = padL + (i / Math.max(values.length - 1, 1)) * plotW;
@@ -120,7 +158,7 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
       min,
       max,
     };
-  }, [points, metric]);
+  }, [points, metric, box.w, box.h]);
 
   const onMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
@@ -130,7 +168,6 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
       const rect = el.getBoundingClientRect();
       const ratio = (e.clientX - rect.left) / Math.max(rect.width, 1);
       const x = ratio * w;
-      // Clamp to plot band for nicer edge targeting.
       const clamped = Math.min(Math.max(x, padL), padL + plotW);
       let best = 0;
       let bestDist = Infinity;
@@ -148,8 +185,12 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
 
   const onLeave = useCallback(() => setHover(null), []);
 
-  if (!chart) {
+  if (points.length === 0) {
     return <div className={styles.empty}>No history yet</div>;
+  }
+
+  if (!chart) {
+    return <div ref={wrapRef} className={styles.wrap} />;
   }
 
   const { values, coords, line, area, w, h, padL, padT, padB, plotW, plotH, baseline, delta, yTicks, xTicks } =
@@ -173,6 +214,8 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
         className={styles.svg}
         viewBox={`0 0 ${w} ${h}`}
         preserveAspectRatio="xMidYMid meet"
+        width="100%"
+        height="100%"
         role="img"
         aria-label={`${metric === "tvl" ? "TVL" : "NAV"} chart over 30 days`}
       >
@@ -194,7 +237,6 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
           </filter>
         </defs>
 
-        {/* Plot frame */}
         <line x1={padL} x2={padL + plotW} y1={baseline} y2={baseline} className={styles.axisLine} />
         <line x1={padL} x2={padL} y1={padT} y2={baseline} className={styles.axisLine} />
 
@@ -247,12 +289,27 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
         />
 
         {hover !== null && (
           <g className={styles.crosshair}>
-            <line x1={ax} x2={ax} y1={padT} y2={baseline} className={styles.vLine} />
-            <line x1={padL} x2={padL + plotW} y1={ay} y2={ay} className={styles.hLine} />
+            <line
+              x1={ax}
+              x2={ax}
+              y1={padT}
+              y2={baseline}
+              className={styles.vLine}
+              vectorEffect="non-scaling-stroke"
+            />
+            <line
+              x1={padL}
+              x2={padL + plotW}
+              y1={ay}
+              y2={ay}
+              className={styles.hLine}
+              vectorEffect="non-scaling-stroke"
+            />
             <circle cx={ax} cy={ay} r="10" className={styles.pulse} filter={`url(#glow-${gid})`} />
             <circle cx={ax} cy={ay} r="5" className={styles.dot} />
             <circle cx={ax} cy={ay} r="2.2" className={styles.dotCore} />
