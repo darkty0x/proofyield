@@ -28,9 +28,9 @@ import {
   redeemShares,
   type ChainActivity,
 } from "@/lib/vault-tx";
-import { deploymentRows, shortAddress } from "@/lib/deployments";
+import { deploymentRows } from "@/lib/deployments";
 
-type Tab = "vault" | "portfolio" | "proofs" | "allocator";
+type Tab = "vault" | "portfolio" | "proofs" | "allocator" | "contracts";
 type Action = "deposit" | "withdraw";
 
 const FILTERS = ["all", "harvested", "attested", "pending", "attesting", "rejected"] as const;
@@ -271,6 +271,16 @@ export default function VaultAppPage() {
   const wallet = useWalletContext();
   const isLive = Boolean(status?.live);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const openContracts = () => {
+      if (window.location.hash === "#deployments") setTab("contracts");
+    };
+    openContracts();
+    window.addEventListener("hashchange", openContracts);
+    return () => window.removeEventListener("hashchange", openContracts);
+  }, []);
+
   const refresh = useCallback(async () => {
     try {
       const [s, h, p, src] = await Promise.all([
@@ -485,6 +495,7 @@ export default function VaultAppPage() {
             ["portfolio", "Portfolio"],
             ["proofs", "Proofs"],
             ["allocator", "Allocator"],
+            ["contracts", "Contracts"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -617,26 +628,13 @@ export default function VaultAppPage() {
                       </dd>
                     </div>
                   </dl>
-                  <div className={styles.contractList}>
-                    {deploymentRows(status).map((row) => (
-                      <div key={row.id} className={styles.contractRow}>
-                        <div>
-                          <div className={styles.contractLabel}>{row.label}</div>
-                          <div className={styles.contractMeta}>{row.chain}</div>
-                        </div>
-                        <a
-                          className={styles.contractLink}
-                          href={row.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          title={row.address}
-                        >
-                          <code>{shortAddress(row.address)}</code>
-                          <span>{row.explorerLabel} →</span>
-                        </a>
-                      </div>
-                    ))}
-                  </div>
+                  <button
+                    type="button"
+                    className={styles.extBtn}
+                    onClick={() => setTab("contracts")}
+                  >
+                    Live deployments →
+                  </button>
                 </article>
 
                 <article className={styles.detailCard}>
@@ -1266,6 +1264,58 @@ export default function VaultAppPage() {
             ) : null}
           </section>
         ) : null}
+
+        {tab === "contracts" ? (
+          <section className={styles.contractsPanel} id="deployments">
+            <div className={styles.contractsHead}>
+              <div>
+                <h1 className={styles.vaultTitle}>Live deployments</h1>
+                <p className={styles.portfolioLead}>
+                  Every contract address with a direct link to the block explorer — Sepolia RWA source
+                  and Creditcoin CC3 vault stack.
+                </p>
+              </div>
+            </div>
+            <div className={styles.deployGrid}>
+              {deploymentRows(status).map((row) => (
+                <a
+                  key={row.id}
+                  href={row.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.deployCard}
+                >
+                  <div className={styles.deployTop}>
+                    <span className={styles.deployLabel}>{row.label}</span>
+                    <span className={styles.deployChain}>{row.chain}</span>
+                  </div>
+                  <code className={styles.deployAddr} title={row.address}>
+                    {row.address}
+                  </code>
+                  <span className={styles.deployScan}>View on {row.explorerLabel} →</span>
+                </a>
+              ))}
+            </div>
+            <p className={styles.contractsFoot}>
+              Full address list ·{" "}
+              <a
+                href="https://github.com/darkty0x/proofyield/blob/main/docs/proofs/testnet-txs.md"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Proof txs
+              </a>
+              {" · "}
+              <a
+                href="https://github.com/darkty0x/proofyield/blob/main/deployments/testnet.json"
+                target="_blank"
+                rel="noreferrer"
+              >
+                deployments/testnet.json
+              </a>
+            </p>
+          </section>
+        ) : null}
       </main>
 
       <footer className={styles.footer}>
@@ -1293,6 +1343,9 @@ export default function VaultAppPage() {
                 </button>
                 <button type="button" onClick={() => setTab("allocator")}>
                   Allocator
+                </button>
+                <button type="button" onClick={() => setTab("contracts")}>
+                  Contracts
                 </button>
               </nav>
             </div>

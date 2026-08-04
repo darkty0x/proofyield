@@ -8,7 +8,6 @@ export const SITE_NAV = [
   { href: "/#engines", label: "Strategy" },
   { href: "/#markets", label: "Markets" },
   { href: "/#powered", label: "Infrastructure" },
-  { href: "/#deployments", label: "Contracts" },
   { href: "/#compare", label: "Yield" },
 ] as const;
 

@@ -7,8 +7,7 @@ import { SiteNavLinks } from "@/components/site-nav";
 import { TransitionLink } from "@/components/transition-link";
 import { SocialLinks } from "@/components/social-links";
 import { useTheme } from "@/components/theme";
-import { api, formatApy, formatSupply, formatUsd, type HistoryPoint, type VaultStatus } from "@/lib/api";
-import { deploymentRows, shortAddress } from "@/lib/deployments";
+import { api, formatApy, formatSupply, formatUsd, type HistoryPoint } from "@/lib/api";
 import styles from "./landing.module.css";
 
 function useReveal() {
@@ -139,7 +138,6 @@ export default function LandingPage() {
   const [supply, setSupply] = useState("10M");
   const [updatedAgo, setUpdatedAgo] = useState("just now");
   const [history, setHistory] = useState<HistoryPoint[]>([]);
-  const [status, setStatus] = useState<VaultStatus | null>(null);
   useReveal();
 
   const partnerSrc = (p: (typeof POWERED)[number]) =>
@@ -153,7 +151,6 @@ export default function LandingPage() {
       try {
         const [s, h] = await Promise.all([api.status(), api.history(30)]);
         if (!alive) return;
-        setStatus(s);
         setApy(formatApy(s.promisedApyBps ?? s.apyBps));
         setTvl(formatUsd(s.tvl));
         setNav(s.sharePrice.toFixed(4));
@@ -536,59 +533,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* DEPLOYMENTS */}
-      <section className={`${styles.section} reveal`} id="deployments">
-        <div className={styles.compareHead}>
-          <div>
-            <h2 className={styles.h2}>Live deployments</h2>
-          </div>
-          <p className={styles.lead}>
-            Every contract address with a direct link to the block explorer — Sepolia RWA source and
-            Creditcoin CC3 vault stack.
-          </p>
-        </div>
-        <div className={`${styles.deployGrid} reveal-stagger`}>
-          {deploymentRows(status).map((row, i) => (
-            <a
-              key={row.id}
-              href={row.href}
-              target="_blank"
-              rel="noreferrer"
-              className={`${styles.deployCard} reveal-item`}
-              data-from="left"
-              style={{ ["--reveal-i" as string]: i }}
-            >
-              <div className={styles.deployTop}>
-                <span className={styles.deployLabel}>{row.label}</span>
-                <span className={styles.deployChain}>{row.chain}</span>
-              </div>
-              <code className={styles.deployAddr} title={row.address}>
-                {shortAddress(row.address)}
-              </code>
-              <span className={styles.deployScan}>View on {row.explorerLabel} →</span>
-            </a>
-          ))}
-        </div>
-        <p className={styles.marketFoot}>
-          FULL ADDRESS LIST ·{" "}
-          <a
-            href="https://github.com/darkty0x/proofyield/blob/main/docs/proofs/testnet-txs.md"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Proof txs
-          </a>
-          {" · "}
-          <a
-            href="https://github.com/darkty0x/proofyield/blob/main/deployments/testnet.json"
-            target="_blank"
-            rel="noreferrer"
-          >
-            deployments/testnet.json
-          </a>
-        </p>
-      </section>
-
       {/* TRANSPARENCY */}
       <section className={`${styles.section} reveal`} id="transparency">
         <div className={`${styles.transparency} reveal-stagger`}>
@@ -822,7 +766,6 @@ export default function LandingPage() {
                 <a href="https://docs.creditcoin.org/creditcoin-usc" target="_blank" rel="noreferrer">
                   Attestcoin docs
                 </a>
-                <a href="#deployments">Contracts</a>
                 <a href="#usc">Proof model</a>
               </nav>
             </div>
