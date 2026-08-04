@@ -14,6 +14,24 @@ import {
 import { AuditLog, StateStore } from "./store.js";
 import type { CouponEvent, ProofRecord } from "./types.js";
 
+/** Real CC3 harvest hashes for coupons that already settled (idempotent retries). */
+const KNOWN_HARVEST_BY_SEPOLIA: Record<string, string> = {
+  "0x5a8b6d6ee97ea486735f7a0ce840d213ba7bf3cd43a10c8cac16b2d0568eaeac":
+    "0x803c4cdb9eebbd4c0bde1b9ff38a6530a56ea7ac70d2091df6e00002e6564ade",
+  "0x88447ed2ed22d0f1db5b57b74b01d317c7e64af7bdf121dc508a0770c2235232":
+    "0x901ac5d3e8c015b8a409ee8f42d6efbbfa1085ac2d4859ab32e5717abd0dd30d",
+};
+
+function isTxHash(h?: string | null): h is string {
+  return Boolean(h && /^0x[a-fA-F0-9]{64}$/.test(h));
+}
+
+function resolveHarvestTx(sepoliaTxHash: string, existing?: string | null): string | undefined {
+  if (isTxHash(existing)) return existing;
+  const known = KNOWN_HARVEST_BY_SEPOLIA[sepoliaTxHash.toLowerCase()];
+  return isTxHash(known) ? known : undefined;
+}
+
 export class HarvestWorker {
   private lastBlock = 0;
   private timer?: NodeJS.Timeout;
@@ -44,6 +62,33 @@ export class HarvestWorker {
       assetAddress: env.CREDITCOIN_ASSET,
     });
     this.syncTokenEconomics();
+    this.repairProofRecords();
+  }
+
+  /** Drop fake harvest markers and restore known CC3 hashes / readable metadata. */
+  private repairProofRecords() {
+    let changed = false;
+    for (const p of this.store.proofs) {
+      const desk =
+        this.policy.sources.find((s) => s.sourceId === p.coupon.sourceId)?.name ??
+        `Source ${p.coupon.sourceId}`;
+      const meta = (p.coupon.metadata ?? "").trim();
+      if (/^(beta[-_]?|demo[-_]?|test[-_]?|cli[-_]?)/i.test(meta) || !meta) {
+        p.coupon.metadata = `${desk} · CouponPaid`;
+        changed = true;
+      }
+      if (p.harvest) {
+        const fixed = resolveHarvestTx(p.coupon.sepoliaTxHash, p.harvest.ctcTxHash);
+        if (fixed && fixed !== p.harvest.ctcTxHash) {
+          p.harvest.ctcTxHash = fixed;
+          changed = true;
+        } else if (p.harvest.ctcTxHash && !isTxHash(p.harvest.ctcTxHash)) {
+          delete p.harvest.ctcTxHash;
+          changed = true;
+        }
+      }
+    }
+    if (changed) this.store.save();
   }
 
   /** Keep display APY = promised; TVL from deposits; supply from env/demo mint. */
@@ -348,12 +393,13 @@ export class HarvestWorker {
       if (msg.includes("CouponAlreadyUsed") || msg.includes("0x887485f3")) {
         try {
           await this.refreshLiveVault();
+          const existing = this.store.proofs.find((p) => p.coupon.id === coupon.id);
           return {
             ok: true,
             meta: {
               queryId: id(`${coupon.sepoliaTxHash}:${coupon.couponId}`),
               sharePriceAfter: this.store.vault.sharePrice,
-              ctcTxHash: "already-harvested",
+              ctcTxHash: resolveHarvestTx(coupon.sepoliaTxHash, existing?.harvest?.ctcTxHash),
             },
           };
         } catch {

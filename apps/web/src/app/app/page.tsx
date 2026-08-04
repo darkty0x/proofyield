@@ -21,6 +21,7 @@ import {
   type SourceItem,
   type VaultStatus,
 } from "@/lib/api";
+import { isTxHash, proofDetail, proofExplorerHref, proofTitle } from "@/lib/proof-display";
 import {
   depositAssets,
   fetchUserVaultActivity,
@@ -42,11 +43,6 @@ const FILTER_LABELS: Record<(typeof FILTERS)[number], string> = {
   attesting: "Attesting",
   rejected: "Rejected",
 };
-
-function proofTitle(p: ProofItem): string {
-  const meta = p.coupon.metadata?.split("·")[0]?.trim();
-  return meta || `Source ${p.coupon.sourceId}`;
-}
 
 function formatWhen(iso: string): string {
   const t = new Date(iso).getTime();
@@ -112,16 +108,12 @@ function buildPortfolioActivity(opts: {
 
   for (const p of proofs) {
     if (p.status !== "harvested" && p.status !== "attested") continue;
-    const href = p.harvest?.ctcTxHash
-      ? `${explorers.ctc}/tx/${p.harvest.ctcTxHash}`
-      : p.coupon.sepoliaTxHash
-        ? `${explorers.sepolia}/tx/${p.coupon.sepoliaTxHash}`
-        : null;
+    const href = proofExplorerHref(p);
     rows.push({
       id: `yield-${p.id}`,
       kind: "yield",
       label: "Proven harvest",
-      detail: proofTitle(p),
+      detail: proofDetail(p),
       amount:
         p.harvest?.sharePriceAfter != null
           ? `NAV ${p.harvest.sharePriceAfter.toFixed(4)}`
@@ -1032,11 +1024,11 @@ export default function VaultAppPage() {
               ) : (
                 displayProofs.map((p) => {
                   const open = openId === p.id;
-                  const sepoliaHref = p.coupon.sepoliaTxHash
+                  const sepoliaHref = isTxHash(p.coupon.sepoliaTxHash)
                     ? `${explorers.sepolia}/tx/${p.coupon.sepoliaTxHash}`
                     : null;
-                  const harvestHref = p.harvest?.ctcTxHash
-                    ? `${explorers.ctc}/tx/${p.harvest.ctcTxHash}`
+                  const harvestHref = isTxHash(p.harvest?.ctcTxHash)
+                    ? `${explorers.ctc}/tx/${p.harvest!.ctcTxHash}`
                     : null;
                   return (
                     <article

@@ -26,7 +26,12 @@ async function main() {
   if (cmd === "post-coupon") {
     const sourceId = Number(args[0] ?? 2);
     const amount = BigInt(args[1] ?? "1000000000"); // 1000 pyUSD 6dec
-    const metadata = args[2] ?? `cli-${Date.now()}`;
+    const desks: Record<number, string> = {
+      1: "Trade Finance Invoice Pool",
+      2: "T-Bill Proxy Desk",
+      3: "Emerging Market Receivables",
+    };
+    const metadata = args[2] ?? `${desks[sourceId] ?? `Source ${sourceId}`} · CouponPaid`;
     const hash = await postCouponOnchain(env, sourceId, amount, metadata);
     console.log(hash);
     return;
