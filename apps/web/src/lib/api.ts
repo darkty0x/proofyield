@@ -100,6 +100,21 @@ export const api = {
       `/api/proofs?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}`,
     ),
   sources: () => getJson<{ items: SourceItem[] }>("/api/sources"),
+  deployments: () =>
+    getJson<{
+      network: string;
+      mode: string;
+      live: boolean;
+      contracts: {
+        id: string;
+        label: string;
+        chain: string;
+        chainId: number;
+        address: string;
+        explorer: string;
+        url: string | null;
+      }[];
+    }>("/api/deployments"),
   faucet: (address: string) =>
     postJson<{ ok: true; txHash: string; amount: number }>("/api/faucet", { address }),
   /** Demo-only mutations — blocked by API when PROOFYIELD_MODE=live. */

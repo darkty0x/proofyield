@@ -22,9 +22,18 @@ const vault = arg("vault");
 const asset = arg("asset");
 
 const data = JSON.parse(readFileSync(path, "utf8"));
-if (source) data.sepolia.rwaSource = source;
-if (vault) data.creditcoin.vault = vault;
-if (asset) data.creditcoin.asset = asset;
+if (source) {
+  data.sepolia.rwaSource = source;
+  data.sepolia.rwaSourceUrl = `https://sepolia.etherscan.io/address/${source}`;
+}
+if (vault) {
+  data.creditcoin.vault = vault;
+  data.creditcoin.vaultUrl = `https://creditcoin-testnet.blockscout.com/address/${vault}`;
+}
+if (asset) {
+  data.creditcoin.asset = asset;
+  data.creditcoin.assetUrl = `https://creditcoin-testnet.blockscout.com/address/${asset}`;
+}
 data.updatedAt = new Date().toISOString();
 
 writeFileSync(path, JSON.stringify(data, null, 2) + "\n");

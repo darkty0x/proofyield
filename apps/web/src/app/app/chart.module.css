@@ -1,7 +1,7 @@
 .wrap {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 260px;
   cursor: crosshair;
   touch-action: none;
   overflow: visible;
@@ -17,6 +17,29 @@
 .grid {
   stroke: var(--line);
   stroke-width: 1;
+}
+
+.axisLine {
+  stroke: color-mix(in srgb, var(--ink) 18%, transparent);
+  stroke-width: 1;
+}
+
+.axisTick {
+  stroke: color-mix(in srgb, var(--ink) 28%, transparent);
+  stroke-width: 1;
+}
+
+.axisLabelY,
+.axisLabelX {
+  fill: var(--muted);
+  font-family: var(--font-mono), ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: -0.01em;
+  pointer-events: none;
+}
+
+.axisLabelX {
+  font-size: 10px;
 }
 
 .crosshair {
@@ -116,7 +139,7 @@
 }
 
 .empty {
-  height: 240px;
+  height: 260px;
   display: grid;
   place-items: center;
   color: var(--muted);
@@ -131,5 +154,17 @@
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .wrap,
+  .empty {
+    height: 220px;
+  }
+
+  .axisLabelY,
+  .axisLabelX {
+    font-size: 9px;
   }
 }

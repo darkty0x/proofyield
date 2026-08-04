@@ -15,6 +15,16 @@ Built for [BUIDL CTC 2026 Fall](https://dorahacks.io/hackathon/buidl-ctc-2026-fa
 | Hackathon | https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail |
 | Railway | https://railway.com/project/6a834e34-f234-40c1-80de-90f1c93db49d |
 
+## Live deployments
+
+| Contract | Network | Address | Explorer |
+|----------|---------|---------|----------|
+| RWA Yield Source | Sepolia | [`0x9c431d…0bCcB`](https://sepolia.etherscan.io/address/0x9c431d95619aBd5A680F8D6DE4A2BDD4c070bCcB) | [Etherscan](https://sepolia.etherscan.io/address/0x9c431d95619aBd5A680F8D6DE4A2BDD4c070bCcB) |
+| ProofYield Vault | Creditcoin CC3 | [`0x9C1bF7…7Fccbc`](https://creditcoin-testnet.blockscout.com/address/0x9C1bF7e744bC11aa2864BCB1701402eAdd7Fccbc) | [Blockscout](https://creditcoin-testnet.blockscout.com/address/0x9C1bF7e744bC11aa2864BCB1701402eAdd7Fccbc) |
+| pyUSD (MockUSDC) | Creditcoin CC3 | [`0x3a9d9B…c1F9`](https://creditcoin-testnet.blockscout.com/address/0x3a9d9B7467D95abf4EAFb1721838eF999662c1F9) | [Blockscout](https://creditcoin-testnet.blockscout.com/address/0x3a9d9B7467D95abf4EAFb1721838eF999662c1F9) |
+
+Source of truth: [`deployments/testnet.json`](deployments/testnet.json) · proof txs: [`docs/proofs/testnet-txs.md`](docs/proofs/testnet-txs.md)
+
 ## Quick start (demo)
 
 ```bash

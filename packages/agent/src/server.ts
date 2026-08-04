@@ -22,6 +22,48 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true, mode: env.PROOFYIELD_MODE });
 });
 
+app.get("/api/deployments", (_req, res) => {
+  const sepoliaExplorer = "https://sepolia.etherscan.io";
+  const ctcExplorer = "https://creditcoin-testnet.blockscout.com";
+  const vault = worker.store.vault.vaultAddress || env.CREDITCOIN_VAULT || "";
+  const asset = worker.store.vault.assetAddress || env.CREDITCOIN_ASSET || "";
+  const source = worker.store.vault.sourceAddress || env.SEPOLIA_RWA_SOURCE || "";
+  res.json({
+    network: "testnet",
+    mode: env.PROOFYIELD_MODE,
+    live: worker.store.vault.live,
+    contracts: [
+      {
+        id: "vault",
+        label: "ProofYield Vault",
+        chain: "Creditcoin CC3",
+        chainId: 102031,
+        address: vault,
+        explorer: ctcExplorer,
+        url: vault ? `${ctcExplorer}/address/${vault}` : null,
+      },
+      {
+        id: "asset",
+        label: "pyUSD (MockUSDC)",
+        chain: "Creditcoin CC3",
+        chainId: 102031,
+        address: asset,
+        explorer: ctcExplorer,
+        url: asset ? `${ctcExplorer}/address/${asset}` : null,
+      },
+      {
+        id: "source",
+        label: "RWA Yield Source",
+        chain: "Sepolia",
+        chainId: 11155111,
+        address: source,
+        explorer: sepoliaExplorer,
+        url: source ? `${sepoliaExplorer}/address/${source}` : null,
+      },
+    ],
+  });
+});
+
 app.get("/api/status", async (req, res) => {
   const address = typeof req.query.address === "string" ? req.query.address : undefined;
   let userShares: number | undefined;

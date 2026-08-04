@@ -6,6 +6,7 @@ import { WalletButton } from "./wallet-button";
 import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
 import { SiteNavLinks } from "@/components/site-nav";
 import { TransitionLink } from "@/components/transition-link";
+import { SocialLinks } from "@/components/social-links";
 import { useWalletContext } from "@/components/wallet-provider";
 import styles from "./app.module.css";
 import {
@@ -26,6 +27,7 @@ import {
   redeemShares,
   type ChainActivity,
 } from "@/lib/vault-tx";
+import { deploymentRows, shortAddress } from "@/lib/deployments";
 
 type Tab = "vault" | "portfolio" | "proofs" | "allocator";
 type Action = "deposit" | "withdraw";
@@ -409,8 +411,18 @@ export default function VaultAppPage() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
+
+    // Live disconnected: primary CTA must open the wallet prompt (not silently no-op).
+    if (isLive && !wallet.connected) {
+      void wallet.connect();
+      return;
+    }
+
     const n = Number(amount);
-    if (!(n > 0)) return;
+    if (!(n > 0)) {
+      setError("Enter an amount greater than 0");
+      return;
+    }
 
     if (isLive) {
       void run(async () => {
@@ -444,6 +456,10 @@ export default function VaultAppPage() {
   }
 
   function onFaucet() {
+    if (!wallet.connected) {
+      void wallet.connect();
+      return;
+    }
     void run(async () => {
       if (!wallet.address) throw new Error("Connect wallet first");
       if (!wallet.onCc3) {
@@ -609,22 +625,26 @@ export default function VaultAppPage() {
                       </dd>
                     </div>
                   </dl>
-                  {status?.vaultAddress ? (
-                    <a
-                      className={styles.ext}
-                      href={`${explorers.ctc}/address/${status.vaultAddress}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View on explorer →
-                    </a>
-                  ) : (
-                    <p className={styles.muted}>
-                      {isLive
-                        ? "Live mode · vault address missing — set CREDITCOIN_VAULT"
-                        : "Demo vault · live address after CC3 deploy"}
-                    </p>
-                  )}
+                  <div className={styles.contractList}>
+                    {deploymentRows(status).map((row) => (
+                      <div key={row.id} className={styles.contractRow}>
+                        <div>
+                          <div className={styles.contractLabel}>{row.label}</div>
+                          <div className={styles.contractMeta}>{row.chain}</div>
+                        </div>
+                        <a
+                          className={styles.contractLink}
+                          href={row.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={row.address}
+                        >
+                          <code>{shortAddress(row.address)}</code>
+                          <span>{row.explorerLabel} →</span>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
                 </article>
 
                 <article className={styles.detailCard}>
@@ -670,31 +690,34 @@ export default function VaultAppPage() {
                 <div className={styles.assetRow}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/brand/pyusd-flat.png"
+                    src={action === "deposit" ? "/brand/pyusd-flat.png" : "/brand/pyvusd-flat.png"}
                     alt=""
                     width={28}
                     height={28}
-                    className={styles.coinPyusd}
+                    className={action === "deposit" ? styles.coinPyusd : styles.coinPyvusd}
                   />
                   <span>
-                    {asset} → {share}
+                    {action === "deposit" ? `${asset} → ${share}` : `${share} → ${asset}`}
                   </span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/brand/pyvusd-flat.png"
+                    src={action === "deposit" ? "/brand/pyvusd-flat.png" : "/brand/pyusd-flat.png"}
                     alt=""
                     width={28}
                     height={28}
-                    className={styles.coinPyvusd}
+                    className={action === "deposit" ? styles.coinPyvusd : styles.coinPyusd}
                   />
                 </div>
 
-                <label className={styles.amountLabel}>Amount</label>
+                <label className={styles.amountLabel}>
+                  {action === "deposit" ? "Deposit amount" : "Withdraw amount"}
+                </label>
                 <div className={styles.amountBox}>
                   <input
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     inputMode="decimal"
+                    placeholder="0.00"
                     aria-label="Amount"
                   />
                   <span>{asset}</span>
@@ -726,14 +749,20 @@ export default function VaultAppPage() {
                   </div>
                 </dl>
 
-                <button className={styles.submit} type="submit" disabled={busy}>
+                <button
+                  className={styles.submit}
+                  type="submit"
+                  disabled={busy || (isLive && !wallet.connected && wallet.connecting)}
+                >
                   {busy
                     ? "Working…"
-                    : isLive && !wallet.connected
-                      ? "Connect wallet to trade"
-                      : action === "deposit"
-                        ? `Deposit ${asset}`
-                        : `Withdraw ${asset}`}
+                    : wallet.connecting
+                      ? "Connecting…"
+                      : isLive && !wallet.connected
+                        ? "Connect wallet to trade"
+                        : action === "deposit"
+                          ? `Deposit ${asset}`
+                          : `Withdraw ${asset}`}
                 </button>
               </form>
 
@@ -741,10 +770,10 @@ export default function VaultAppPage() {
                 <button
                   className={styles.secondary}
                   type="button"
-                  disabled={busy || !wallet.connected}
+                  disabled={busy || wallet.connecting}
                   onClick={onFaucet}
                 >
-                  Get test pyUSD
+                  {wallet.connected ? "Get test pyUSD" : "Connect wallet for faucet"}
                 </button>
               ) : (
                 <button
@@ -770,6 +799,7 @@ export default function VaultAppPage() {
                   Live CC3 · coupons harvest via agent after Sepolia Attestcoin proof
                 </p>
               ) : null}
+              {wallet.error ? <p className={styles.tradeLiveHint}>{wallet.error}</p> : null}
             </aside>
           </div>
         ) : null}
@@ -1253,6 +1283,7 @@ export default function VaultAppPage() {
             <p className={styles.footerTag}>
               RWA yield vault with Attestcoin proofs on Creditcoin CC3.
             </p>
+            <SocialLinks />
           </div>
 
           <div className={styles.footerCols}>
@@ -1288,10 +1319,6 @@ export default function VaultAppPage() {
             <div>
               <h3 className={styles.footerColTitle}>Build</h3>
               <nav className={styles.footerColLinks}>
-                <TransitionLink href="/">Marketing site</TransitionLink>
-                <a href="https://github.com/darkty0x/proofyield" target="_blank" rel="noreferrer">
-                  GitHub
-                </a>
                 <a
                   href="https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail"
                   target="_blank"

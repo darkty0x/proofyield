@@ -82,7 +82,12 @@ const depPath = resolve(root, "deployments/testnet.json");
 const dep = JSON.parse(readFileSync(depPath, "utf8"));
 dep.creditcoin.asset = assetAddr;
 dep.creditcoin.vault = vaultAddr;
-if (source) dep.sepolia.rwaSource = source;
+dep.creditcoin.assetUrl = `https://creditcoin-testnet.blockscout.com/address/${assetAddr}`;
+dep.creditcoin.vaultUrl = `https://creditcoin-testnet.blockscout.com/address/${vaultAddr}`;
+if (source) {
+  dep.sepolia.rwaSource = source;
+  dep.sepolia.rwaSourceUrl = `https://sepolia.etherscan.io/address/${source}`;
+}
 dep.updatedAt = new Date().toISOString();
 writeFileSync(depPath, JSON.stringify(dep, null, 2) + "\n");
 console.log("Updated", depPath);

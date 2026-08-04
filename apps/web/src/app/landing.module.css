@@ -1990,6 +1990,29 @@
   display: block;
 }
 
+.compareIcon[data-tone="py"] {
+  background: color-mix(in srgb, var(--blue) 16%, var(--surface-2));
+}
+
+.compareIcon[data-tone="treasury"] {
+  background: #0b1f3a;
+}
+
+.compareIcon[data-tone="fintech"] {
+  background: #0f6b4c;
+}
+
+.compareIcon[data-tone="banks"] {
+  background: #4a5568;
+}
+
+.compareIcon[data-tone="treasury"] img,
+.compareIcon[data-tone="fintech"] img,
+.compareIcon[data-tone="banks"] img {
+  width: 44px;
+  height: 44px;
+}
+
 .compareTags {
   display: flex;
   flex-wrap: wrap;
@@ -2022,6 +2045,63 @@
 
 .compareBarRow:not(.compareBarHot) .barFillWide {
   background: color-mix(in srgb, var(--blue) 42%, transparent);
+}
+
+.deployGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.deployCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 18px 16px;
+  border-radius: 18px;
+  background: var(--card-face);
+  border: var(--card-rim);
+  box-shadow: var(--card-inset), var(--card-shadow);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.deployCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-inset), 0 18px 40px rgba(16, 24, 32, 0.12);
+}
+
+.deployTop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.deployLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.deployChain {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.deployAddr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.deployScan {
+  margin-top: auto;
+  font-size: 13px;
+  color: var(--blue);
 }
 
 :global(html[data-theme="dark-gold"]) .compareBarRow:not(.compareBarHot) .barFillWide {
@@ -2082,6 +2162,7 @@
   .poweredFeature,
   .transparency,
   .compareHead,
+  .deployGrid,
   .engineCard,
   .footerInner {
     grid-template-columns: 1fr;
