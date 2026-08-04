@@ -1,22 +1,22 @@
-# Demo script (≤3 minutes)
+# Demo script (≤3 minutes) — Live production
 
 Do **not** film `.env`, private keys, or API secrets.
 
 ## Setup
 
-1. `PROOFYIELD_MODE=demo` agent on :8787, web on :3000 (or Railway Live URLs).
-2. Browser zoom comfortable; hide bookmarks bar.
+1. Web: https://proofyield-web-production.up.railway.app  
+2. MetaMask funded on Creditcoin Testnet (CC3); dashboard badge must read **Live**.  
+3. Browser zoom comfortable; hide bookmarks bar.  
+4. Keep open: [proof txs](./proofs/testnet-txs.md) explorers in local tabs.
 
 ## Take
 
-1. **Hero (10s)** — “ProofYield: RWA yield, Attestcoin-proven.” Show Live/Demo pill, interlocking APY + TVL cards.
-2. **Deposit (20s)** — Enter amount → Deposit. Point at NAV per share.
-3. **Harvest (40s)** — Click **Prove & harvest**. Scroll to proof feed. Expand row: AI rationale → Attestcoin fields → share price bump.
-4. **Allocator (20s)** — Show three RWA sources / weights.
-5. **Close (15s)** — “Share price only moves after Sepolia coupons are proven on Creditcoin. Built as the deposit layer for CTC DeFi.”
+1. **Hero (15s)** — “ProofYield: RWA yield, Attestcoin-proven.” Show **Live** pill, APY + TVL.
+2. **Connect + faucet (20s)** — Vault app → Connect → Get test pyUSD.
+3. **Deposit (20s)** — Amount → Deposit. Point at NAV per share.
+4. **Proofs (40s)** — Proofs tab → expand T-Bill harvest → Sepolia + CC3 explorer links + AI rationale.
+5. **Contracts (15s)** — Contracts tab: vault, pyUSD, RWA source.
+6. **Allocator (15s)** — Three RWA desks / weights.
+7. **Close (15s)** — “Share price only moves after Sepolia coupons are proven on Creditcoin.”
 
-## Live mode extras
-
-- Show Sepolia `CouponPaid` tx on explorer (local browser, avoid Cloudflare-blocked headless).
-- Show CC3 harvest tx / vault address on Blockscout.
-- Dashboard must read **Live**, not Demo/Offline.
+Full paste-ready BUIDL fields + shot list: [dorahacks-submission.md](./dorahacks-submission.md).
