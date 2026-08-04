@@ -7,6 +7,7 @@
 | API | https://proofyield-api-production.up.railway.app |
 | Deployments | https://proofyield-api-production.up.railway.app/api/deployments |
 | Contracts UI | https://proofyield-web-production.up.railway.app/app (Contracts tab) |
+| Docs | https://proofyield-web-production.up.railway.app/docs |
 | Mandatory | Attestcoin Protocol integration |
 | UI reference | https://atoma.fi/ (hero, type, motion, interlocking stats) |
 

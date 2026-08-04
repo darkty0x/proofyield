@@ -1358,12 +1358,14 @@ export default function VaultAppPage() {
                 <a href="https://docs.creditcoin.org/creditcoin-usc" target="_blank" rel="noreferrer">
                   Attestcoin docs
                 </a>
-                <TransitionLink href="/#usc">Proof model</TransitionLink>
+                <TransitionLink href="/docs/attestcoin">Proof model</TransitionLink>
+                <TransitionLink href="/docs">Docs</TransitionLink>
               </nav>
             </div>
             <div>
               <h3 className={styles.footerColTitle}>Build</h3>
               <nav className={styles.footerColLinks}>
+                <TransitionLink href="/docs">Whitepaper</TransitionLink>
                 <a
                   href="https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail"
                   target="_blank"

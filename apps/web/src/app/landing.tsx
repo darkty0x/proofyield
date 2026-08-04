@@ -753,6 +753,7 @@ export default function LandingPage() {
               <h3 className={styles.footerColTitle}>Product</h3>
               <nav className={styles.footerColLinks}>
                 <TransitionLink href="/app">Vault app</TransitionLink>
+                <TransitionLink href="/docs">Docs</TransitionLink>
                 <a href="#how">How it works</a>
                 <a href="#compare">Yield</a>
               </nav>
@@ -766,12 +767,13 @@ export default function LandingPage() {
                 <a href="https://docs.creditcoin.org/creditcoin-usc" target="_blank" rel="noreferrer">
                   Attestcoin docs
                 </a>
-                <a href="#usc">Proof model</a>
+                <TransitionLink href="/docs/attestcoin">Proof model</TransitionLink>
               </nav>
             </div>
             <div>
               <h3 className={styles.footerColTitle}>Build</h3>
               <nav className={styles.footerColLinks}>
+                <TransitionLink href="/docs">Whitepaper</TransitionLink>
                 <a
                   href="https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail"
                   target="_blank"

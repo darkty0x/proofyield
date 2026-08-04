@@ -9,6 +9,7 @@ export const SITE_NAV = [
   { href: "/#markets", label: "Markets" },
   { href: "/#powered", label: "Infrastructure" },
   { href: "/#compare", label: "Yield" },
+  { href: "/docs", label: "Docs" },
 ] as const;
 
 type Props = {
@@ -21,8 +22,10 @@ export function SiteNavLinks({ className, mode = "app" }: Props) {
   return (
     <nav className={className} aria-label="Primary">
       {SITE_NAV.map((item) => {
-        const href = mode === "landing" ? item.href.replace("/#", "#") : item.href;
-        if (mode === "landing") {
+        const isHash = item.href.includes("#");
+        const href =
+          mode === "landing" && isHash ? item.href.replace("/#", "#") : item.href;
+        if (mode === "landing" && isHash) {
           return (
             <a key={item.href} href={href}>
               {item.label}

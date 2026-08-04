@@ -66,6 +66,11 @@ https://proofyield-web-production.up.railway.app
 
 ### Project deck / whitepaper URL
 ```
+https://proofyield-web-production.up.railway.app/docs
+```
+
+### Alternate deck source (markdown)
+```
 https://github.com/darkty0x/proofyield/blob/main/docs/ceip-deck.md
 ```
 

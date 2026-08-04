@@ -11,6 +11,7 @@ Built for [BUIDL CTC 2026 Fall](https://dorahacks.io/hackathon/buidl-ctc-2026-fa
 | Surface | URL |
 |---------|-----|
 | Web | https://proofyield-web-production.up.railway.app |
+| Docs / whitepaper | https://proofyield-web-production.up.railway.app/docs |
 | API | https://proofyield-api-production.up.railway.app |
 | Hackathon | https://dorahacks.io/hackathon/buidl-ctc-2026-fall/detail |
 | Railway | https://railway.com/project/6a834e34-f234-40c1-80de-90f1c93db49d |
