@@ -49,19 +49,22 @@ export class HarvestWorker {
   /** Keep display APY = promised; TVL from deposits; supply from env/demo mint. */
   private syncTokenEconomics() {
     const v = this.store.vault;
-    v.tokenSupply = this.env.DEMO_TOKEN_SUPPLY;
     v.promisedApyBps = this.env.PROMISED_APY_BPS;
     v.apyBps = this.env.PROMISED_APY_BPS;
     v.shareSymbol = v.shareSymbol || "pyvUSD";
     v.assetSymbol = v.assetSymbol || "pyUSD";
 
+    // Demo-only decorative economics. Live mode reads chain via refreshLiveVault.
+    if (this.env.PROOFYIELD_MODE !== "demo") {
+      this.store.save();
+      return;
+    }
+
+    v.tokenSupply = this.env.DEMO_TOKEN_SUPPLY;
+
     // Fresh demo vault: accrue ~3 weeks of promised yield into pyvUSD NAV
     // so share price isn't stuck at 1.0000 with a flat chart.
-    if (
-      this.env.PROOFYIELD_MODE === "demo" &&
-      (v.harvestCount ?? 0) === 0 &&
-      (v.sharePrice ?? 1) <= 1.00001
-    ) {
+    if ((v.harvestCount ?? 0) === 0 && (v.sharePrice ?? 1) <= 1.00001) {
       const days = 21;
       const accruedFrac = (this.env.PROMISED_APY_BPS / 10_000) * (days / 365);
       const harvested = Math.round(this.env.DEMO_SEED_TVL * accruedFrac);
@@ -340,7 +343,24 @@ export class HarvestWorker {
         },
       };
     } catch (err) {
-      return { ok: false, error: err instanceof Error ? err.message : String(err) };
+      const msg = err instanceof Error ? err.message : String(err);
+      // Another worker / prior attempt already accrued this coupon.
+      if (msg.includes("CouponAlreadyUsed") || msg.includes("0x887485f3")) {
+        try {
+          await this.refreshLiveVault();
+          return {
+            ok: true,
+            meta: {
+              queryId: id(`${coupon.sepoliaTxHash}:${coupon.couponId}`),
+              sharePriceAfter: this.store.vault.sharePrice,
+              ctcTxHash: "already-harvested",
+            },
+          };
+        } catch {
+          /* fall through */
+        }
+      }
+      return { ok: false, error: msg };
     }
   }
 

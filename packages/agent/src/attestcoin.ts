@@ -49,8 +49,21 @@ export async function proveSepoliaTx(
 
     const tx = await sourceProvider.getTransaction(sepoliaTxHash);
     const height = tx?.blockNumber ?? blockNumber;
+
+    const withTimeout = <T,>(p: Promise<T>, ms: number, label: string): Promise<T> =>
+      Promise.race([
+        p,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms),
+        ),
+      ]);
+
     try {
-      await proofBuilder.waitUntilHeightAttested(chainKey, height);
+      await withTimeout(
+        proofBuilder.waitUntilHeightAttested(chainKey, height),
+        45_000,
+        `waitUntilHeightAttested(${height})`,
+      );
     } catch (err) {
       return {
         success: false,
@@ -60,7 +73,11 @@ export async function proveSepoliaTx(
       };
     }
 
-    const result = await proofBuilder.getProof(sepoliaTxHash);
+    const result = await withTimeout(
+      proofBuilder.getProof(sepoliaTxHash),
+      30_000,
+      "getProof",
+    );
     if (!result.success || !result.data) {
       return {
         success: false,

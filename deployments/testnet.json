@@ -1,6 +1,6 @@
 {
   "network": "testnet",
-  "updatedAt": "2026-08-04T00:08:32.992Z",
+  "updatedAt": "2026-08-04T00:31:32.392Z",
   "sepolia": {
     "chainId": 11155111,
     "explorer": "https://sepolia.etherscan.io",
@@ -10,8 +10,8 @@
     "chainId": 102031,
     "explorer": "https://creditcoin-testnet.blockscout.com",
     "rpc": "https://rpc.cc3-testnet.creditcoin.network",
-    "asset": null,
-    "vault": null,
+    "asset": "0x3a9d9B7467D95abf4EAFb1721838eF999662c1F9",
+    "vault": "0x9C1bF7e744bC11aa2864BCB1701402eAdd7Fccbc",
     "assetSymbol": "pyUSD",
     "shareSymbol": "pyvUSD",
     "assetDecimals": 6
