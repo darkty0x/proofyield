@@ -107,8 +107,10 @@ https://proofyield-api-production.up.railway.app/api/deployments
 ```
 Every yield accrual requires an Attestcoin-proven Sepolia CouponPaid tx.
 The agent waits for CC3 attestation, builds inclusion proofs with @gluwa/usc-sdk,
-and ProofYieldVault harvestTrusted verifies before accruing into the ERC-4626 vault.
-NAV never moves on faith.
+and ProofYieldVault harvestTrusted/_accrue only after verification.
+ERC-4626 inflation/donation is mitigated with OpenZeppelin virtual shares
+(_decimalsOffset = 3) plus harvest caps, coupon replay keys, and desk allowlists.
+Whitepaper: https://proofyield-web-production.up.railway.app/docs/erc4626-security
 ```
 
 ### Tags / keywords

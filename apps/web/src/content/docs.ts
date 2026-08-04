@@ -32,13 +32,21 @@ export const DOC_NAV: { group: string; items: { slug: string; title: string }[] 
       { slug: "architecture", title: "Architecture" },
       { slug: "attestcoin", title: "Attestcoin" },
       { slug: "vault", title: "Vault & tokens" },
+      { slug: "allocator", title: "Allocator math" },
+    ],
+  },
+  {
+    group: "Security",
+    items: [
+      { slug: "erc4626-security", title: "ERC-4626 attacks" },
+      { slug: "security", title: "Trust & controls" },
+      { slug: "implementation", title: "Implementation" },
     ],
   },
   {
     group: "Reference",
     items: [
       { slug: "contracts", title: "Contracts" },
-      { slug: "security", title: "Security model" },
       { slug: "roadmap", title: "Roadmap" },
     ],
   },
@@ -62,14 +70,24 @@ export const DOCS: DocSection[] = [
       },
       {
         type: "h2",
-        text: "Who it is for",
+        text: "Thesis",
+      },
+      {
+        type: "p",
+        text: "Creditcoin’s Attestcoin Protocol can make foreign-chain cashflow events verifiable facts on CC3. ProofYield turns that primitive into a composable ERC-4626 share (pyvUSD) with explicit math for exchange-rate safety, harvest caps, coupon replay protection, and desk allowlisting.",
+      },
+      {
+        type: "h2",
+        text: "Document map",
       },
       {
         type: "ul",
         items: [
-          "Depositors who want RWA-style yield without trusting a centralized oracle feed",
-          "Builders composing CTC DeFi who need a verifiable yield share (pyvUSD)",
-          "Judges and partners evaluating Attestcoin depth on Creditcoin testnet",
+          "Architecture — component diagram and end-to-end sequence",
+          "Attestcoin — prover SDK path and on-chain USC execute",
+          "ERC-4626 attacks — inflation / donation math and virtual-share defense",
+          "Allocator math — risk scoring and coupon-vs-TVL caps",
+          "Implementation — exact hackathon code paths and live addresses",
         ],
       },
       {
@@ -81,23 +99,15 @@ export const DOCS: DocSection[] = [
         headers: ["Surface", "URL"],
         rows: [
           ["Web app", "https://proofyield-web-production.up.railway.app"],
+          ["Docs", "https://proofyield-web-production.up.railway.app/docs"],
           ["API", "https://proofyield-api-production.up.railway.app"],
-          ["GitHub", "https://github.com/darkty0x/proofyield"],
           ["Deployments API", "https://proofyield-api-production.up.railway.app/api/deployments"],
+          ["GitHub", "https://github.com/darkty0x/proofyield"],
         ],
       },
       {
-        type: "h2",
-        text: "Core loop",
-      },
-      {
         type: "code",
-        text: "observe (Sepolia CouponPaid)\n  → decide (allocator policy / AI rationale)\n  → Attestcoin prove (@gluwa/usc-sdk)\n  → harvest (ProofYieldVault)\n  → audit (proofs ledger)",
-      },
-      {
-        type: "callout",
-        title: "Non-negotiable",
-        text: "In live mode, deposits alone never inflate APY. Every accrual requires a proven coupon path through Attestcoin.",
+        text: "observe (Sepolia CouponPaid)\n  → decide (allocator policy)\n  → Attestcoin prove (@gluwa/usc-sdk)\n  → harvest (ProofYieldVault)\n  → audit (proofs ledger)",
       },
     ],
   },
@@ -106,36 +116,36 @@ export const DOCS: DocSection[] = [
     title: "Problem",
     group: "Whitepaper",
     summary:
-      "Creditcoin needs sticky TVL. Today’s RWA yield products either invent APY off-chain or depend on trusted oracles that can lie.",
+      "Creditcoin needs sticky TVL. RWA yield that depends on trusted oracles or naked ERC-4626 exchange rates can be forged or inflated.",
     body: [
       {
         type: "p",
-        text: "Creditcoin’s thesis is real-world credit and cross-chain verification. For DeFi on CTC to retain deposits, yield must be credible — not emission farming dressed as RWA.",
+        text: "Two failure modes dominate “RWA vault” demos: (1) APY invented by an oracle or operator dashboard, and (2) ERC-4626 share-price games that steal first depositors via donation / inflation attacks.",
       },
       {
         type: "h2",
-        text: "Failure modes of “RWA yield” today",
+        text: "Yield without proof",
       },
       {
         type: "ol",
         items: [
-          "Oracle-reported coupons — a single operator can publish false cashflows.",
-          "Bridged IOUs — bridging risk and custodian risk dominate the product.",
-          "Emission APY — TVL is rented, not earned from underlying receivables.",
+          "Oracle-reported coupons — a single operator publishes false cashflows.",
+          "Bridged IOUs — bridging and custodian risk dominate the product.",
+          "Emission APY — TVL is rented, not earned from receivables.",
         ],
       },
       {
         type: "h2",
-        text: "What depositors actually need",
+        text: "ERC-4626 without defenses",
       },
       {
         type: "p",
-        text: "A share token whose NAV increases only when an external cashflow event is proven on Creditcoin. That proof must be inspectable on a block explorer, not asserted in a dashboard.",
+        text: "Naive empty-vault minting uses shares = assets when supply is zero. An attacker deposits 1 wei, donates a huge balance directly to the vault, then victims mint at a poisoned rate and round to zero shares. OpenZeppelin’s virtual offset and harvest-path discipline are required before a vault is “hackathon-ready,” let alone mainnet-ready.",
       },
       {
         type: "callout",
-        title: "Insight",
-        text: "Attestcoin exists so foreign-chain history can become a verifiable fact on CC3. ProofYield turns that primitive into a deposit product.",
+        title: "Design requirement",
+        text: "ProofYield must both (a) gate accrual on Attestcoin-proven coupons and (b) use virtual-share math so donations cannot zero out honest depositors.",
       },
     ],
   },
@@ -144,11 +154,11 @@ export const DOCS: DocSection[] = [
     title: "Solution",
     group: "Whitepaper",
     summary:
-      "One-click ERC-4626 vault. AI-ranked RWA desks. Attestcoin-gated harvest. Composable pyvUSD shares on Creditcoin.",
+      "ERC-4626 vault with virtual-share offset, Attestcoin-gated harvest, desk allowlists, harvest caps, and coupon replay protection.",
     body: [
       {
         type: "p",
-        text: "ProofYield packages Attestcoin into a familiar vault UX: connect wallet, get test pyUSD, deposit, and watch proofs and NAV update in the app.",
+        text: "ProofYield packages Attestcoin into a familiar vault UX while encoding exchange-rate and harvest safety in Solidity and policy math.",
       },
       {
         type: "h2",
@@ -157,20 +167,14 @@ export const DOCS: DocSection[] = [
       {
         type: "ul",
         items: [
-          "ERC-4626 vault on Creditcoin CC3 (pyvUSD shares / pyUSD asset)",
-          "Sepolia RwaYieldSource emits CouponPaid for RWA desks",
-          "Agent allocates across desks with risk scores and TVL caps",
-          "Attestcoin proves Sepolia inclusion before harvestTrusted",
-          "Proofs ledger + Contracts tab link every address and tx to explorers",
+          "ERC-4626 vault on CC3 with _decimalsOffset = 3 (virtual shares)",
+          "Sepolia RwaYieldSource emits CouponPaid for allowlisted desks",
+          "Agent allocation: risk score + max coupon bps of TVL",
+          "Attestcoin prove via @gluwa/usc-sdk before harvest",
+          "usedCoupons[sepoliaTxHash‖couponId] prevents double accrual",
+          "maxHarvestBps caps each harvest vs current TVL (default 5%)",
+          "Pause + ReentrancyGuard on deposit/mint/withdraw/redeem/harvest",
         ],
-      },
-      {
-        type: "h2",
-        text: "Why this unlocks CTC DeFi",
-      },
-      {
-        type: "p",
-        text: "Once pyvUSD NAV is proof-backed, lending markets, DEXes, and structured products on Creditcoin can treat it as collateral with a transparent accrual story — the flywheel described in the CEIP deck.",
       },
       {
         type: "quote",
@@ -194,10 +198,10 @@ export const DOCS: DocSection[] = [
         headers: ["Component", "Chain", "Role"],
         rows: [
           ["RwaYieldSource", "Sepolia", "Registers desks; emits CouponPaid"],
-          ["MockUSDC (pyUSD)", "CC3", "Deposit asset / faucet mint"],
-          ["ProofYieldVault", "CC3", "ERC-4626 + harvestTrusted"],
+          ["MockUSDC (pyUSD)", "CC3", "Deposit asset / faucet / harvest mint"],
+          ["ProofYieldVault", "CC3", "ERC-4626 + USCBase + harvestTrusted"],
           ["Agent API", "Off-chain", "Observe → decide → Attestcoin → harvest"],
-          ["Web app", "Off-chain", "Wallet I/O, proofs, contracts UI"],
+          ["Web app", "Off-chain", "Wallet I/O, proofs, contracts, docs"],
         ],
       },
       {
@@ -207,12 +211,13 @@ export const DOCS: DocSection[] = [
       {
         type: "ol",
         items: [
-          "Desk posts a coupon on Sepolia (amount + metadata).",
-          "Agent indexes CouponPaid logs and scores the desk.",
-          "On accept, agent waits until the Sepolia height is attested on CC3.",
-          "Agent builds an inclusion proof via @gluwa/usc-sdk.",
-          "Harvester calls harvestTrusted; vault accrues assets; sharePrice rises.",
-          "UI shows the proof with Sepolia + CC3 explorer links.",
+          "Desk posts CouponPaid on Sepolia (amount + metadata).",
+          "Agent indexes logs; decideAllocation scores the desk.",
+          "On accept: waitUntilHeightAttested(chainKey, height).",
+          "getProof(txHash); PrecompileBlockProver.verifySingle on CC3.",
+          "Harvester calls harvestTrusted (or execute with inclusion proof).",
+          "_accrue mints pyUSD into the vault → sharePrice rises; shares unchanged.",
+          "UI shows proof with Sepolia + CC3 explorer links.",
         ],
       },
       {
@@ -221,7 +226,7 @@ export const DOCS: DocSection[] = [
       },
       {
         type: "code",
-        text: "contracts/     Foundry — RwaYieldSource, MockUSDC, ProofYieldVault\npackages/agent Node — watcher, allocator, Attestcoin, HTTP API\napps/web       Next.js — landing, vault app, docs\ndeployments/   Canonical testnet addresses\ndocs/          Integration notes, proofs, submission",
+        text: "contracts/src/ProofYieldVault.sol   ERC-4626 + USC + harvest controls\ncontracts/src/USCBase.sol            verifyAndEmit → process once\npackages/agent/src/attestcoin.ts     @gluwa/usc-sdk ProofBuilder\npackages/agent/src/allocator.ts      risk / TVL-cap policy\napps/web/src/content/docs.ts         this whitepaper",
       },
     ],
   },
@@ -230,25 +235,31 @@ export const DOCS: DocSection[] = [
     title: "Attestcoin",
     group: "Protocol",
     summary:
-      "ProofYield gates all yield accrual on Attestcoin-proven Sepolia coupons — the mandatory Creditcoin primitive for this track.",
+      "Every live harvest is preceded by Attestcoin height attestation and inclusion proof verification via @gluwa/usc-sdk.",
     body: [
       {
         type: "p",
-        text: "Attestcoin Protocol (formerly USC) attests foreign-chain history and verifies inclusion proofs on Creditcoin via the Native Query Verifier precompile. ProofYield uses this so a Sepolia CouponPaid cannot move vault NAV until CC3 accepts the proof path.",
+        text: "Attestcoin Protocol (formerly USC) attests foreign-chain history and verifies inclusion proofs on Creditcoin via the Native Query Verifier precompile at 0x…0FD2.",
       },
       {
         type: "h2",
-        text: "Integration steps",
+        text: "Off-chain prove path (live agent)",
       },
       {
-        type: "ol",
-        items: [
-          "Observe CouponPaid on Sepolia RwaYieldSource.",
-          "Run allocation policy (accept / reject).",
-          "ProofBuilder.waitUntilHeightAttested(chainKey, blockNumber).",
-          "ProofBuilder.getProof(txHash); optional on-chain verify.",
-          "harvestTrusted on ProofYieldVault after verification.",
-        ],
+        type: "code",
+        text: "ProofBuilder(chainKey, ATTESTCOIN_PROVER_URL)\n  .waitUntilHeightAttested(chainKey, blockNumber)  // timeout 45s\n  .getProof(sepoliaTxHash)                         // timeout 30s\nPrecompileBlockProver(creditcoinRpc)\n  .verifySingle(chainKey, headerNumber, txBytes, merkleProof, continuityProof)",
+      },
+      {
+        type: "p",
+        text: "Implemented in packages/agent/src/attestcoin.ts. Failures leave the proof in attesting so the next poll retries — harvest never runs on an unverified coupon in live mode.",
+      },
+      {
+        type: "h2",
+        text: "On-chain USC path",
+      },
+      {
+        type: "p",
+        text: "USCBase.execute(...) computes queryId, rejects duplicates via processedQueries, calls VERIFIER.verifyAndEmit(...), then _processAndEmitEvent → _accrue. That is the preferred mainnet path. Testnet beta currently uses harvestTrusted after off-chain verify for operational reliability, with the same _accrue accounting.",
       },
       {
         type: "h2",
@@ -265,21 +276,9 @@ export const DOCS: DocSection[] = [
         ],
       },
       {
-        type: "h2",
-        text: "References",
-      },
-      {
-        type: "ul",
-        items: [
-          "https://docs.creditcoin.org/creditcoin-usc",
-          "https://docs.creditcoin.org/creditcoin-usc/dapp-builder-infrastructure/usc-sdk",
-          "https://docs.creditcoin.org/creditcoin-usc/usc-chains-environments",
-        ],
-      },
-      {
         type: "callout",
         title: "Judging note",
-        text: "Depth of Attestcoin utilization is a core criterion. ProofYield does not treat Attestcoin as optional decoration — it is the gate on every harvest.",
+        text: "Attestcoin is not optional decoration. Deposits never inflate APY; only proven coupons call _accrue.",
       },
     ],
   },
@@ -287,7 +286,8 @@ export const DOCS: DocSection[] = [
     slug: "vault",
     title: "Vault & tokens",
     group: "Protocol",
-    summary: "pyUSD is the underlying asset. pyvUSD is the ERC-4626 vault share. NAV = totalAssets / totalSupply.",
+    summary:
+      "pyUSD underlying, pyvUSD shares. NAV = totalAssets / totalSupply (display). Conversions use OpenZeppelin virtual-offset math.",
     body: [
       {
         type: "h2",
@@ -295,11 +295,23 @@ export const DOCS: DocSection[] = [
       },
       {
         type: "table",
-        headers: ["Symbol", "Role", "Network"],
+        headers: ["Symbol", "Role", "Decimals"],
         rows: [
-          ["pyUSD", "Deposit / redeem asset (MockUSDC, 6 decimals)", "Creditcoin CC3"],
-          ["pyvUSD", "Vault shares (ERC-4626)", "Creditcoin CC3"],
+          ["pyUSD", "ERC-20 asset (MockUSDC)", "6"],
+          ["pyvUSD", "ERC-4626 vault share", "6 + offset (display 6; internal offset 3)"],
         ],
+      },
+      {
+        type: "h2",
+        text: "Share price display",
+      },
+      {
+        type: "code",
+        text: "sharePrice() =\n  supply == 0 ? 10^assetDecimals\n              : totalAssets() * 10^assetDecimals / totalSupply()",
+      },
+      {
+        type: "p",
+        text: "Harvest mints underlying into the vault without minting shares, so totalAssets rises while totalSupply is unchanged → sharePrice rises for all holders equally.",
       },
       {
         type: "h2",
@@ -308,24 +320,273 @@ export const DOCS: DocSection[] = [
       {
         type: "ul",
         items: [
-          "Connect MetaMask → switch to Creditcoin Testnet (CC3)",
-          "Get test pyUSD from the in-app faucet",
-          "Approve + deposit into ProofYieldVault",
-          "Redeem shares to withdraw pyUSD",
-          "Inspect Proofs and Contracts for explorer-backed state",
+          "Connect MetaMask → Creditcoin Testnet (CC3)",
+          "Faucet mints test pyUSD",
+          "approve + deposit / redeem",
+          "Inspect Proofs + Contracts for explorer-backed state",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "allocator",
+    title: "Allocator math",
+    group: "Protocol",
+    summary:
+      "Deterministic underwriter: risk score from desk riskBps, reject if coupon exceeds maxCouponBpsOfTvl or score < minRiskScore.",
+    body: [
+      {
+        type: "h2",
+        text: "Desk parameters",
+      },
+      {
+        type: "table",
+        headers: ["sourceId", "Desk", "tranche", "riskBps", "targetWeightBps"],
+        rows: [
+          ["1", "Trade Finance Invoice Pool", "senior", "200", "4000"],
+          ["2", "T-Bill Proxy Desk", "treasury", "50", "4500"],
+          ["3", "Emerging Market Receivables", "mezz", "450", "1500"],
         ],
       },
       {
         type: "h2",
-        text: "How NAV moves",
-      },
-      {
-        type: "p",
-        text: "Harvests mint additional underlying into the vault after a proven coupon. Share price increases for all holders. Deposits mint shares at the current share price without fabricating yield.",
+        text: "Risk score",
       },
       {
         type: "code",
-        text: "sharePrice ≈ totalAssets / totalSupply\n// rises only after harvestTrusted succeeds for a proven coupon",
+        text: "riskScore = clamp(0, 100, 100 - riskBps / 5)\n\n// examples\n// treasury riskBps=50  → score 90\n// senior   riskBps=200 → score 60\n// mezz     riskBps=450 → score 10",
+      },
+      {
+        type: "h2",
+        text: "Coupon vs TVL cap",
+      },
+      {
+        type: "code",
+        text: "couponBps = (couponAmount / tvl) * 10_000\nreject if couponBps > maxCouponBpsOfTvl   // default 500 (= 5%)\n\n// mirrors on-chain maxHarvestBps so policy and vault agree",
+      },
+      {
+        type: "p",
+        text: "Reject if riskScore < minRiskScore (default 40). Accept rationale is stored on the proof record for the Proofs UI.",
+      },
+      {
+        type: "callout",
+        title: "On-chain twin",
+        text: "Even if the agent mis-scores, ProofYieldVault._accrue still enforces allowlistedSources and maxHarvestBps.",
+      },
+    ],
+  },
+  {
+    slug: "erc4626-security",
+    title: "ERC-4626 attacks",
+    group: "Security",
+    summary:
+      "Mathematical treatment of inflation / donation attacks and ProofYield’s virtual-share offset defense (OpenZeppelin ERC-4626 + δ = 3).",
+    body: [
+      {
+        type: "quote",
+        text: "Exchange-rate safety is a prerequisite for any yield vault — Attestcoin does not fix a broken ERC-4626 mint formula.",
+      },
+      {
+        type: "h2",
+        text: "Exchange rate",
+      },
+      {
+        type: "p",
+        text: "Let A = totalAssets(), S = totalSupply(), δ = _decimalsOffset(). OpenZeppelin v5 conversions:",
+      },
+      {
+        type: "code",
+        text: "convertToShares(x) = x * (S + 10^δ) / (A + 1)\nconvertToAssets(y) = y * (A + 1) / (S + 10^δ)\n\nProofYield: δ = 3  ⇒  virtualShares = 1000, virtualAssets = 1",
+      },
+      {
+        type: "h2",
+        text: "Classic inflation / donation attack",
+      },
+      {
+        type: "p",
+        text: "Without virtual offsets (naive empty-vault mint shares = assets):",
+      },
+      {
+        type: "ol",
+        items: [
+          "Attacker deposits 1 wei when S = 0 → receives 1 share.",
+          "Attacker transfers D ≫ 1 assets directly to the vault (donation). Now A ≈ D, S = 1.",
+          "Victim deposits X. shares = X * S / A = X / D. If X < D, integer division → 0 shares.",
+          "Attacker redeems the only share and steals the victim’s deposit.",
+        ],
+      },
+      {
+        type: "code",
+        text: "// Naive (unsafe) empty vault\nshares_victim = X * 1 / D     // → 0 when X < D\n\n// With virtual offset δ\nshares_victim = X * (0 + 10^δ) / (D + 1)\n             = X * 1000 / (D + 1)     // δ=3\n// Non-zero for any X >= 1 when D is finite",
+      },
+      {
+        type: "h2",
+        text: "Worked example (δ = 3)",
+      },
+      {
+        type: "p",
+        text: "Attacker deposits 1 unit, donates 100_000e6 pyUSD. Victim deposits 10_000e6:",
+      },
+      {
+        type: "code",
+        text: "S_virt = 1*1000 + 1000 = 2000   // approx after first deposit accounting\n// Exact OZ path after attacker deposit(1):\n//   shares_a = 1 * 10^3 / 1 = 1000\n// After donation A = 1 + 100_000e6\n// Victim deposit 10_000e6:\nshares_v = 10_000e6 * (1000 + 1000) / (100_000e6 + 1 + 1)\n         ≈ 10_000e6 * 2000 / 100_000e6\n         ≈ 200_000\n// >> 0  → attack fails to zero-out victim",
+      },
+      {
+        type: "p",
+        text: "Foundry coverage: testDonationAttackVictimStillGetsShares in contracts/test/ProofYieldVault.t.sol (asserts victimShares > 0 and redeemable assets > 9_000e6).",
+      },
+      {
+        type: "h2",
+        text: "What virtual shares do not fix",
+      },
+      {
+        type: "ul",
+        items: [
+          "They do not prevent dilution from legitimate harvest mints (by design — all holders share yield).",
+          "They do not replace Attestcoin — a malicious harvester could still mint fake yield without proofs.",
+          "They do not replace harvest caps / allowlists / pause.",
+        ],
+      },
+      {
+        type: "h2",
+        text: "Implementation",
+      },
+      {
+        type: "code",
+        text: "// ProofYieldVault.sol\nfunction _decimalsOffset() internal pure override returns (uint8) {\n    return 3;\n}",
+      },
+      {
+        type: "callout",
+        title: "Deploy note",
+        text: "δ = 3 is in source and tests. If a prior testnet vault was deployed before this offset, redeploy to inherit the stronger virtual-share defense. Live addresses are listed under Contracts.",
+      },
+    ],
+  },
+  {
+    slug: "security",
+    title: "Trust & controls",
+    group: "Security",
+    summary:
+      "Layered controls: ERC-4626 virtual shares, harvest caps, coupon replay keys, desk allowlists, pause, reentrancy guards, Attestcoin gating.",
+    body: [
+      {
+        type: "h2",
+        text: "Control matrix",
+      },
+      {
+        type: "table",
+        headers: ["Control", "Where", "Failure mode blocked"],
+      rows: [
+          ["_decimalsOffset = 3", "ProofYieldVault", "Empty-vault inflation / donation → 0 shares"],
+          ["usedCoupons[tx‖id]", "harvestTrusted / _accrue", "Double harvest of same coupon"],
+          ["processedQueries[queryId]", "USCBase.execute", "Replay of same Attestcoin query"],
+          ["allowlistedSources", "_accrue", "Unknown desk IDs"],
+          ["maxHarvestBps (≤ 5% default)", "_accrue", "Single harvest draining / spiking NAV"],
+          ["whenNotPaused", "ERC-4626 + harvest", "Ops freeze under incident"],
+          ["nonReentrant", "deposit/mint/withdraw/redeem/harvest", "ERC-777 style reentrancy"],
+          ["harvester/owner only", "harvestTrusted", "Public fake accrual"],
+          ["Attestcoin verify (live)", "agent attestcoin.ts", "Unproven Sepolia cashflow"],
+          ["Allocator TVL + risk caps", "allocator.ts", "Oversized / junk coupons pre-harvest"],
+        ],
+      },
+      {
+        type: "h2",
+        text: "Remaining trust (testnet)",
+      },
+      {
+        type: "ul",
+        items: [
+          "Harvester key can call harvestTrusted after off-chain verify (migrate to execute-only).",
+          "RwaYieldSource owner posts coupons (simulates desks).",
+          "Faucet minter for test pyUSD.",
+          "Agent / Railway operator availability.",
+        ],
+      },
+      {
+        type: "h2",
+        text: "User verification checklist",
+      },
+      {
+        type: "ol",
+        items: [
+          "App badge reads Live.",
+          "Contracts tab addresses match deployments/testnet.json.",
+          "Harvested proof links open real Sepolia + CC3 txs.",
+          "Never paste keys; never film .env.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "implementation",
+    title: "Implementation",
+    group: "Security",
+    summary:
+      "Hackathon implementation map: Solidity entrypoints, agent prove/harvest loop, and how the UI surfaces proofs.",
+    body: [
+      {
+        type: "h2",
+        text: "Solidity — accrual",
+      },
+      {
+        type: "code",
+        text: "function _accrue(queryId, sourceId, couponId, amount) internal {\n  require(allowlistedSources[sourceId]);\n  if (totalAssets() > 0) {\n    cap = totalAssets() * maxHarvestBps / 10_000;\n    require(amount <= cap);          // HarvestCapExceeded\n  }\n  MockUSDC(asset()).mint(address(this), amount);  // A↑, S unchanged\n  totalHarvested += amount;\n  emit YieldHarvested(... sharePrice());\n}",
+      },
+      {
+        type: "h2",
+        text: "Solidity — replay key",
+      },
+      {
+        type: "code",
+        text: "couponKey = keccak256(abi.encodePacked(sepoliaTxHash, couponId));\nif (usedCoupons[couponKey]) revert CouponAlreadyUsed();\nusedCoupons[couponKey] = true;",
+      },
+      {
+        type: "h2",
+        text: "Agent — live tick",
+      },
+      {
+        type: "ol",
+        items: [
+          "pollLiveCoupons: fetch CouponPaid logs from Sepolia source",
+          "processCoupon: decideAllocation → proveSepoliaTx → harvestTrusted",
+          "retryOpenProofs: re-drive attesting/attested rows (Attestcoin lag)",
+          "refreshLiveVault: sync TVL / sharePrice from chain",
+          "repairProofRecords: normalize metadata + restore known harvest hashes",
+        ],
+      },
+      {
+        type: "h2",
+        text: "Why harvestTrusted on testnet",
+      },
+      {
+        type: "p",
+        text: "USCBase.execute is implemented and preferred for mainnet. Beta testnet uses harvestTrusted after PrecompileBlockProver.verifySingle so operator tooling can recover from Attestcoin prover latency without stranding coupons. Accounting (_accrue) is identical.",
+      },
+      {
+        type: "h2",
+        text: "Tests shipped",
+      },
+      {
+        type: "ul",
+        items: [
+          "testDepositAndHarvestRaisesSharePrice",
+          "testDonationAttackVictimStillGetsShares",
+          "testHarvestCap",
+          "testRejectUnknownSource",
+          "testRwaSourceEmitsCoupon",
+        ],
+      },
+      {
+        type: "h2",
+        text: "UI honesty",
+      },
+      {
+        type: "ul",
+        items: [
+          "Live mode never falls back to template proofs",
+          "Explorer links require 0x + 64 hex (no already-harvested placeholders)",
+          "Coupon labels map to desk names, not internal CLI tags",
+        ],
       },
     ],
   },
@@ -333,7 +594,7 @@ export const DOCS: DocSection[] = [
     slug: "contracts",
     title: "Contracts",
     group: "Reference",
-    summary: "Canonical live testnet addresses with explorer links. Also available in-app under Contracts.",
+    summary: "Canonical live testnet addresses with explorer links.",
     body: [
       {
         type: "table",
@@ -374,58 +635,7 @@ export const DOCS: DocSection[] = [
       },
       {
         type: "p",
-        text: "Source of truth in-repo: deployments/testnet.json and docs/proofs/testnet-txs.md.",
-      },
-    ],
-  },
-  {
-    slug: "security",
-    title: "Security model",
-    group: "Reference",
-    summary:
-      "Trust boundaries for testnet: what Attestcoin removes, what remains operator-controlled, and what users should verify.",
-    body: [
-      {
-        type: "h2",
-        text: "What Attestcoin removes",
-      },
-      {
-        type: "ul",
-        items: [
-          "Belief that a dashboard APY equals on-chain accrual",
-          "Need for a centralized price oracle to invent coupon income",
-        ],
-      },
-      {
-        type: "h2",
-        text: "What remains trusted on testnet",
-      },
-      {
-        type: "ul",
-        items: [
-          "Harvester key that may call harvestTrusted after off-chain verify",
-          "RwaYieldSource owner who posts coupons (simulates RWA desks)",
-          "Faucet minter for test pyUSD",
-          "Agent host / Railway deployment operator",
-        ],
-      },
-      {
-        type: "h2",
-        text: "User checklist",
-      },
-      {
-        type: "ol",
-        items: [
-          "Confirm the app badge reads Live.",
-          "Open Contracts and verify addresses match deployments/testnet.json.",
-          "Open a harvested proof and click Sepolia + CC3 explorer links.",
-          "Never paste private keys; never film .env.",
-        ],
-      },
-      {
-        type: "callout",
-        title: "Mainnet path",
-        text: "Production hardening moves toward on-path USC execute verification, desk allowlists, and reduced harvester privilege — see Roadmap.",
+        text: "Source of truth: deployments/testnet.json · docs/proofs/testnet-txs.md",
       },
     ],
   },
@@ -433,19 +643,20 @@ export const DOCS: DocSection[] = [
     slug: "roadmap",
     title: "Roadmap",
     group: "Reference",
-    summary: "From BUIDL CTC testnet vault to CEIP-ready deposit infrastructure for Creditcoin DeFi.",
+    summary: "From BUIDL CTC testnet vault to CEIP-ready deposit infrastructure.",
     body: [
       {
         type: "h2",
-        text: "Now — BUIDL CTC testnet",
+        text: "Now",
       },
       {
         type: "ul",
         items: [
           "Live Sepolia + CC3 deployments",
           "Attestcoin-gated harvest loop",
+          "ERC-4626 virtual-share offset + Foundry donation test",
           "Wallet deposit / redeem + faucet",
-          "Public proofs and contracts UI",
+          "Public proofs, contracts UI, whitepaper docs",
         ],
       },
       {
@@ -455,19 +666,11 @@ export const DOCS: DocSection[] = [
       {
         type: "ul",
         items: [
-          "Deeper on-path USC execute verification in the vault",
-          "Institutional desk onboarding + tranche labeling",
+          "Default harvest path = USCBase.execute only (remove harvestTrusted privilege)",
+          "Formalize desk onboarding + tranche labeling",
           "Composable pyvUSD as CTC lending / DEX collateral",
           "Mainnet RWA partners and CEIP fast-track",
         ],
-      },
-      {
-        type: "h2",
-        text: "Ask",
-      },
-      {
-        type: "p",
-        text: "CEIP fast-track: capital, engineering advisory, and distribution through the Creditcoin community so ProofYield can become the default verified RWA deposit layer on CTC.",
       },
     ],
   },

@@ -70,6 +70,14 @@ contract ProofYieldVault is ERC4626, Ownable, ReentrancyGuard, USCBase {
         allowlistedSources[3] = true;
     }
 
+    /// @dev Virtual shares offset (OpenZeppelin ERC-4626 inflation / donation mitigation).
+    /// With offset δ=3, empty-vault mint uses `shares = assets * 10^3 / 1`, so a 1-wei
+    /// first deposit cannot monopolize the exchange rate after a large direct donation.
+    /// See docs: /docs/erc4626-security
+    function _decimalsOffset() internal pure override returns (uint8) {
+        return 3;
+    }
+
     function setSourceYieldContract(address source) external onlyOwner {
         require(source != address(0), "zero");
         sourceYieldContract = source;
