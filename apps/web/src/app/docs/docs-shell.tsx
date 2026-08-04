@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
-import { TransitionLink } from "@/components/transition-link";
 import { DOC_NAV } from "@/content/docs";
 import styles from "./docs.module.css";
 
@@ -18,11 +18,11 @@ export function DocsShell({ slug, children }: Props) {
     <div className={styles.shell}>
       <header className={styles.top}>
         <div className={styles.topLeft}>
-          <BrandLogo href="/" markSize={26} />
+          <BrandLogo href="/" markSize={26} transition={false} />
           <span className={styles.docsMark}>Docs</span>
           <nav className={styles.topLinks} aria-label="Docs chrome">
-            <TransitionLink href="/docs/overview">Whitepaper</TransitionLink>
-            <TransitionLink href="/app">Vault app</TransitionLink>
+            <Link href="/docs/overview">Whitepaper</Link>
+            <Link href="/app">Vault app</Link>
             <a href="https://github.com/darkty0x/proofyield" target="_blank" rel="noreferrer">
               GitHub
             </a>
@@ -41,12 +41,12 @@ export function DocsShell({ slug, children }: Props) {
               <ul className={styles.navList}>
                 {group.items.map((item) => (
                   <li key={item.slug}>
-                    <TransitionLink
+                    <Link
                       href={`/docs/${item.slug}`}
                       className={`${styles.navLink} ${slug === item.slug ? styles.navOn : ""}`}
                     >
                       {item.title}
-                    </TransitionLink>
+                    </Link>
                   </li>
                 ))}
               </ul>

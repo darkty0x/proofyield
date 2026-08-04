@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TransitionLink } from "@/components/transition-link";
 import { DOCS, getDoc, getDocIndex } from "@/content/docs";
 import { DocBlocks } from "../doc-body";
 import { DocsShell } from "../docs-shell";
@@ -42,21 +42,18 @@ export default async function DocPage({ params }: Props) {
 
       <nav className={styles.pager} aria-label="Doc pagination">
         {prev ? (
-          <TransitionLink href={`/docs/${prev.slug}`} className={styles.pageLink}>
+          <Link href={`/docs/${prev.slug}`} className={styles.pageLink}>
             <span>Previous</span>
             <strong>{prev.title}</strong>
-          </TransitionLink>
+          </Link>
         ) : (
           <span />
         )}
         {next ? (
-          <TransitionLink
-            href={`/docs/${next.slug}`}
-            className={`${styles.pageLink} ${styles.pageNext}`}
-          >
+          <Link href={`/docs/${next.slug}`} className={`${styles.pageLink} ${styles.pageNext}`}>
             <span>Next</span>
             <strong>{next.title}</strong>
-          </TransitionLink>
+          </Link>
         ) : null}
       </nav>
     </DocsShell>

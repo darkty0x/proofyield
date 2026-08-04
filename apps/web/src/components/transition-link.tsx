@@ -46,11 +46,14 @@ export function TransitionLink({ href, onClick, ...props }: Props) {
         });
       };
 
+      // Docs should feel like git docs — instant nav, no page morph.
+      const fromDocs = window.location.pathname.startsWith("/docs");
+      const toDocs = url.startsWith("/docs");
       const doc = document as Document & {
         startViewTransition?: (cb: () => void) => { finished: Promise<void> };
       };
 
-      if (typeof doc.startViewTransition === "function") {
+      if (!fromDocs && !toDocs && typeof doc.startViewTransition === "function") {
         doc.startViewTransition(navigate);
       } else {
         navigate();

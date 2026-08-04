@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import Link from "next/link";
 import { THEME_META, useTheme } from "./theme";
 import { TransitionLink } from "./transition-link";
 import styles from "./brand-logo.module.css";
@@ -11,9 +12,17 @@ type Props = {
   className?: string;
   /** Use dark-surface lockup (white PROOF) — for footer / dark panels */
   onDark?: boolean;
+  /** Skip view-transition soft-nav (docs). Default true. */
+  transition?: boolean;
 };
 
-export function BrandLogo({ href = "/", markSize = 30, className, onDark }: Props) {
+export function BrandLogo({
+  href = "/",
+  markSize = 30,
+  className,
+  onDark,
+  transition = true,
+}: Props) {
   const { theme } = useTheme();
   const meta = THEME_META[theme];
   const logo = onDark ? (theme === "dark-gold" ? "l11" : "l01") : meta.logo;
@@ -39,10 +48,14 @@ export function BrandLogo({ href = "/", markSize = 30, className, onDark }: Prop
   );
 
   if (href) {
+    const cls = `${styles.lock} ${className ?? ""}`;
+    if (transition) {
+      return <TransitionLink href={href} className={cls}>{inner}</TransitionLink>;
+    }
     return (
-      <TransitionLink href={href} className={`${styles.lock} ${className ?? ""}`}>
+      <Link href={href} className={cls}>
         {inner}
-      </TransitionLink>
+      </Link>
     );
   }
   return <div className={`${styles.lock} ${className ?? ""}`}>{inner}</div>;
