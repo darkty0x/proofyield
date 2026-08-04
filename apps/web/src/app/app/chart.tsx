@@ -34,8 +34,9 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
     const span = Math.max(max - min, metric === "tvl" ? 1 : 0.0001);
     const w = 640;
     const h = 220;
-    const padX = 8;
-    const padY = 16;
+    // Keep end marker fully inside the viewBox (was clipping / looking squashed).
+    const padX = 18;
+    const padY = 18;
 
     const coords = values.map((v, i) => {
       const x = padX + (i / Math.max(values.length - 1, 1)) * (w - padX * 2);
@@ -99,7 +100,7 @@ export function VaultChart({ points, metric = "tvl" }: Props) {
       onPointerLeave={onLeave}
       onPointerDown={onMove}
     >
-      <svg className={styles.svg} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden>
+      <svg className={styles.svg} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" aria-hidden>
         <defs>
           <linearGradient id={`chartFill-${gid}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--chart-fill)" />

@@ -22,10 +22,24 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true, mode: env.PROOFYIELD_MODE });
 });
 
-app.get("/api/status", (_req, res) => {
+app.get("/api/status", async (req, res) => {
+  const address = typeof req.query.address === "string" ? req.query.address : undefined;
+  let userShares: number | undefined;
+  if (address && env.PROOFYIELD_MODE === "live") {
+    try {
+      userShares = await worker.userShares(address);
+    } catch {
+      userShares = undefined;
+    }
+  }
   res.json({
     ...worker.store.vault,
-    statusLabel: worker.store.vault.live ? "Live" : env.PROOFYIELD_MODE === "demo" ? "Demo" : "Offline",
+    userShares,
+    statusLabel: worker.store.vault.live
+      ? "Live"
+      : env.PROOFYIELD_MODE === "demo"
+        ? "Demo"
+        : "Offline",
   });
 });
 
@@ -59,7 +73,20 @@ app.get("/api/audit", (req, res) => {
   res.json({ items: worker.audit.list(limit) });
 });
 
+app.post("/api/faucet", async (req, res) => {
+  try {
+    const to = String(req.body?.address ?? "");
+    const result = await worker.faucet(to);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 app.post("/api/demo/deposit", (req, res) => {
+  if (env.PROOFYIELD_MODE === "live") {
+    return res.status(400).json({ error: "Demo deposit disabled in live mode — use wallet deposit" });
+  }
   try {
     const amount = Number(req.body?.amount ?? 0);
     if (!(amount > 0)) return res.status(400).json({ error: "amount required" });
@@ -70,6 +97,9 @@ app.post("/api/demo/deposit", (req, res) => {
 });
 
 app.post("/api/demo/withdraw", (req, res) => {
+  if (env.PROOFYIELD_MODE === "live") {
+    return res.status(400).json({ error: "Demo withdraw disabled in live mode — use wallet redeem" });
+  }
   try {
     const amount = Number(req.body?.amount ?? 0);
     if (!(amount > 0)) return res.status(400).json({ error: "amount required" });
@@ -80,6 +110,11 @@ app.post("/api/demo/withdraw", (req, res) => {
 });
 
 app.post("/api/demo/harvest", async (req, res) => {
+  if (env.PROOFYIELD_MODE === "live") {
+    return res.status(400).json({
+      error: "Demo harvest disabled in live mode — post a Sepolia coupon for the agent to harvest",
+    });
+  }
   try {
     const record = await worker.runDemoHarvest({
       sourceId: req.body?.sourceId ? Number(req.body.sourceId) : undefined,

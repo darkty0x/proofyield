@@ -1,6 +1,6 @@
 "use client";
 
-import { useWallet } from "@/lib/wallet";
+import { useWalletContext } from "@/components/wallet-provider";
 import styles from "./app.module.css";
 
 export function WalletButton() {
@@ -13,7 +13,7 @@ export function WalletButton() {
     connect,
     disconnect,
     switchToCc3,
-  } = useWallet();
+  } = useWalletContext();
 
   if (!connected) {
     return (

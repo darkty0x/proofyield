@@ -4,12 +4,14 @@
   height: 240px;
   cursor: crosshair;
   touch-action: none;
+  overflow: visible;
 }
 
 .svg {
   width: 100%;
   height: 100%;
   display: block;
+  overflow: visible;
 }
 
 .grid {

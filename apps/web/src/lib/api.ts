@@ -13,6 +13,8 @@ export type VaultStatus = {
   totalHarvested: number;
   harvestCount: number;
   depositorShares: number;
+  /** Connected wallet share balance when status requested with ?address= */
+  userShares?: number;
   assetSymbol: string;
   shareSymbol?: string;
   vaultAddress?: string;
@@ -88,13 +90,19 @@ async function postJson<T>(path: string, body?: unknown): Promise<T> {
 }
 
 export const api = {
-  status: () => getJson<VaultStatus>("/api/status"),
+  status: (address?: string) =>
+    getJson<VaultStatus>(
+      address ? `/api/status?address=${encodeURIComponent(address)}` : "/api/status",
+    ),
   history: (days = 30) => getJson<{ items: HistoryPoint[] }>(`/api/history?days=${days}`),
   proofs: (q = "", status = "all") =>
     getJson<{ items: ProofItem[]; total: number }>(
       `/api/proofs?q=${encodeURIComponent(q)}&status=${encodeURIComponent(status)}`,
     ),
   sources: () => getJson<{ items: SourceItem[] }>("/api/sources"),
+  faucet: (address: string) =>
+    postJson<{ ok: true; txHash: string; amount: number }>("/api/faucet", { address }),
+  /** Demo-only mutations — blocked by API when PROOFYIELD_MODE=live. */
   deposit: (amount: number) => postJson<VaultStatus>("/api/demo/deposit", { amount }),
   withdraw: (amount: number) => postJson<VaultStatus>("/api/demo/withdraw", { amount }),
   harvest: (payload?: { sourceId?: number; amount?: number }) =>

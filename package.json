@@ -15,6 +15,7 @@
     "dev:web": "npm run dev -w @proofyield/web",
     "dev:agent": "npm run dev -w @proofyield/agent",
     "start:agent": "npm run start -w @proofyield/agent",
+    "deploy:cc3": "node scripts/deploy-cc3.mjs",
     "lint": "npm run lint -w @proofyield/web --if-present"
   },
   "engines": {

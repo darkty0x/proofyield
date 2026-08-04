@@ -5,6 +5,7 @@ import { decideAllocation, defaultPolicy, rankSources } from "./allocator.js";
 import { proveSepoliaTx } from "./attestcoin.js";
 import {
   VAULT_ABI,
+  ERC20_ABI,
   createCreditcoinProvider,
   createHarvesterWallet,
   createSepoliaProvider,
@@ -16,6 +17,7 @@ import type { CouponEvent, ProofRecord } from "./types.js";
 export class HarvestWorker {
   private lastBlock = 0;
   private timer?: NodeJS.Timeout;
+  private faucetHits = new Map<string, number>();
   readonly audit: AuditLog;
   readonly store: StateStore;
   readonly policy;
@@ -157,9 +159,20 @@ export class HarvestWorker {
         return;
       }
       await this.pollLiveCoupons();
+      await this.retryOpenProofs();
       await this.refreshLiveVault();
     } catch (err) {
       this.audit.push("error", err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  /** Retry coupons stuck in attesting / attested (Attestcoin lag or harvest gas hiccups). */
+  private async retryOpenProofs() {
+    const open = this.store.proofs.filter(
+      (p) => p.status === "attesting" || p.status === "attested" || p.status === "pending",
+    );
+    for (const p of open.slice(0, 5)) {
+      await this.processCoupon(p.coupon);
     }
   }
 
@@ -187,56 +200,80 @@ export class HarvestWorker {
   }
 
   async processCoupon(coupon: CouponEvent): Promise<ProofRecord> {
-    const existing = this.store.proofs.find((p) => p.coupon.sepoliaTxHash === coupon.sepoliaTxHash);
-    if (existing && existing.status === "harvested") return existing;
+    const existing = this.store.proofs.find(
+      (p) =>
+        p.coupon.sepoliaTxHash === coupon.sepoliaTxHash &&
+        p.coupon.couponId === coupon.couponId,
+    );
+    if (existing?.status === "harvested") return existing;
+    if (existing?.status === "rejected" && existing.decision?.action === "reject") return existing;
 
-    let record: ProofRecord = {
+    let record: ProofRecord = existing ?? {
       id: coupon.id,
       coupon,
       status: "pending",
       updatedAt: new Date().toISOString(),
     };
-    this.store.upsertProof(record);
-    this.audit.push("observe", `Coupon ${coupon.couponId} from source ${coupon.sourceId}`, {
-      tx: coupon.sepoliaTxHash,
-      amount: coupon.amount,
-    });
+    if (!existing) {
+      this.store.upsertProof(record);
+      this.audit.push("observe", `Coupon ${coupon.couponId} from source ${coupon.sourceId}`, {
+        tx: coupon.sepoliaTxHash,
+        amount: coupon.amount,
+      });
+    }
 
-    const decision = decideAllocation(coupon, this.store.vault.tvl, this.policy);
-    record = { ...record, decision, status: decision.action === "reject" ? "rejected" : "attesting", updatedAt: new Date().toISOString() };
-    this.store.upsertProof(record);
-    this.audit.push("decide", decision.rationale, { action: decision.action, riskScore: decision.riskScore });
+    if (!record.decision) {
+      const decision = decideAllocation(coupon, this.store.vault.tvl, this.policy);
+      record = {
+        ...record,
+        decision,
+        status: decision.action === "reject" ? "rejected" : "attesting",
+        updatedAt: new Date().toISOString(),
+      };
+      this.store.upsertProof(record);
+      this.audit.push("decide", decision.rationale, {
+        action: decision.action,
+        riskScore: decision.riskScore,
+      });
+      if (decision.action === "reject") return record;
+    } else if (record.status === "pending") {
+      record = { ...record, status: "attesting", updatedAt: new Date().toISOString() };
+      this.store.upsertProof(record);
+    }
 
-    if (decision.action === "reject") return record;
+    if (record.status !== "attested") {
+      const proof = await proveSepoliaTx(this.env, coupon.sepoliaTxHash, coupon.blockNumber);
+      const ready = proof.success && proof.verified !== false;
+      // Transient Attestcoin lag → stay attesting so the next tick retries.
+      record = {
+        ...record,
+        status: ready ? "attested" : "attesting",
+        attestcoin: {
+          chainKey: proof.chainKey,
+          headerNumber: proof.headerNumber,
+          verified: proof.verified,
+          proverUrl: this.env.ATTESTCOIN_PROVER_URL,
+        },
+        error: ready ? undefined : proof.error,
+        updatedAt: new Date().toISOString(),
+      };
+      this.store.upsertProof(record);
+      this.audit.push(
+        "attest",
+        ready
+          ? `Attestcoin proof ok (mock=${Boolean(proof.mock)})`
+          : `Attestcoin pending: ${proof.error ?? "not ready"}`,
+        { headerNumber: proof.headerNumber, verified: proof.verified },
+      );
+      if (!ready) return record;
+    }
 
-    const proof = await proveSepoliaTx(this.env, coupon.sepoliaTxHash, coupon.blockNumber);
+    const harvest = await this.harvest(coupon, record.attestcoin?.headerNumber);
     record = {
       ...record,
-      status: proof.success && proof.verified !== false ? "attested" : "rejected",
-      attestcoin: {
-        chainKey: proof.chainKey,
-        headerNumber: proof.headerNumber,
-        verified: proof.verified,
-        proverUrl: this.env.ATTESTCOIN_PROVER_URL,
-      },
-      error: proof.error,
-      updatedAt: new Date().toISOString(),
-    };
-    this.store.upsertProof(record);
-    this.audit.push(
-      "attest",
-      proof.success ? `Attestcoin proof ok (mock=${Boolean(proof.mock)})` : `Attestcoin failed: ${proof.error}`,
-      { headerNumber: proof.headerNumber, verified: proof.verified },
-    );
-
-    if (record.status !== "attested") return record;
-
-    const harvest = await this.harvest(coupon, proof.headerNumber);
-    record = {
-      ...record,
-      status: harvest.ok ? "harvested" : "rejected",
-      harvest: harvest.meta,
-      error: harvest.error,
+      status: harvest.ok ? "harvested" : "attested",
+      harvest: harvest.meta ?? record.harvest,
+      error: harvest.ok ? undefined : harvest.error,
       updatedAt: new Date().toISOString(),
     };
     this.store.upsertProof(record);
@@ -245,7 +282,7 @@ export class HarvestWorker {
       this.store.save();
       this.audit.push("harvest", `Accrued $${coupon.amount} to vault`, harvest.meta);
     } else {
-      this.audit.push("harvest", `Harvest failed: ${harvest.error}`);
+      this.audit.push("harvest", `Harvest deferred: ${harvest.error}`);
     }
     return record;
   }
@@ -323,14 +360,16 @@ export class HarvestWorker {
     if (!this.env.CREDITCOIN_VAULT) return;
     const provider = createCreditcoinProvider(this.env);
     const vault = new Contract(this.env.CREDITCOIN_VAULT, VAULT_ABI, provider);
-    const [totalAssets, totalSupply, sharePrice, apy, harvested, count] = await Promise.all([
-      vault.totalAssets(),
-      vault.totalSupply(),
-      vault.sharePrice(),
-      vault.reportedApyBps(),
-      vault.totalHarvested(),
-      vault.harvestCount(),
-    ]);
+    const [totalAssets, totalSupply, sharePrice, apy, harvested, count, assetAddr] =
+      await Promise.all([
+        vault.totalAssets(),
+        vault.totalSupply(),
+        vault.sharePrice(),
+        vault.reportedApyBps(),
+        vault.totalHarvested(),
+        vault.harvestCount(),
+        vault.asset(),
+      ]);
     this.store.vault = {
       ...this.store.vault,
       mode: "live",
@@ -341,13 +380,14 @@ export class HarvestWorker {
       apyBps: Number(apy) || this.env.PROMISED_APY_BPS,
       promisedApyBps: this.env.PROMISED_APY_BPS,
       realizedApyBps: Number(apy),
-      tokenSupply: this.env.DEMO_TOKEN_SUPPLY,
+      tokenSupply: Number(totalSupply) / 1e6,
       totalHarvested: Number(harvested) / 1e6,
       harvestCount: Number(count),
       shareSymbol: "pyvUSD",
+      assetSymbol: "pyUSD",
       vaultAddress: this.env.CREDITCOIN_VAULT,
       sourceAddress: this.env.SEPOLIA_RWA_SOURCE,
-      assetAddress: this.env.CREDITCOIN_ASSET,
+      assetAddress: this.env.CREDITCOIN_ASSET || String(assetAddr),
     };
     this.store.save();
   }
@@ -379,5 +419,50 @@ export class HarvestWorker {
     this.store.save();
     this.audit.push("withdraw", `Demo withdraw $${amount}`, { tvl: v.tvl });
     return v;
+  }
+
+  /** Live-only: mint/transfer test pyUSD to a user wallet (rate-limited). */
+  async faucet(to: string): Promise<{ ok: true; txHash: string; amount: number }> {
+    if (this.env.PROOFYIELD_MODE !== "live") {
+      throw new Error("Faucet requires PROOFYIELD_MODE=live");
+    }
+    if (!this.env.CREDITCOIN_ASSET) throw new Error("CREDITCOIN_ASSET unset");
+    if (!/^0x[a-fA-F0-9]{40}$/.test(to)) throw new Error("invalid address");
+
+    const key = to.toLowerCase();
+    const last = this.faucetHits.get(key) ?? 0;
+    const wait = this.env.FAUCET_COOLDOWN_MS - (Date.now() - last);
+    if (wait > 0) throw new Error(`Faucet cooldown — retry in ${Math.ceil(wait / 1000)}s`);
+
+    const provider = createCreditcoinProvider(this.env);
+    const wallet = createHarvesterWallet(this.env, provider);
+    if (!wallet) throw new Error("HARVESTER_PRIVATE_KEY unset");
+
+    const asset = new Contract(this.env.CREDITCOIN_ASSET, ERC20_ABI, wallet);
+    const decimals = Number(await asset.decimals());
+    const amountRaw = BigInt(Math.round(this.env.FAUCET_AMOUNT * 10 ** decimals));
+
+    let tx;
+    try {
+      tx = await asset.mint(to, amountRaw);
+    } catch {
+      // Fallback: transfer from faucet wallet balance if mint role missing.
+      tx = await asset.transfer(to, amountRaw);
+    }
+    const receipt = await tx.wait();
+    this.faucetHits.set(key, Date.now());
+    this.audit.push("faucet", `Sent ${this.env.FAUCET_AMOUNT} pyUSD to ${to}`, {
+      txHash: receipt.hash,
+    });
+    return { ok: true, txHash: receipt.hash as string, amount: this.env.FAUCET_AMOUNT };
+  }
+
+  /** User share balance on the live vault (human units). */
+  async userShares(address: string): Promise<number> {
+    if (!this.env.CREDITCOIN_VAULT || !/^0x[a-fA-F0-9]{40}$/.test(address)) return 0;
+    const provider = createCreditcoinProvider(this.env);
+    const vault = new Contract(this.env.CREDITCOIN_VAULT, VAULT_ABI, provider);
+    const bal = await vault.balanceOf(address);
+    return Number(bal) / 1e6;
   }
 }

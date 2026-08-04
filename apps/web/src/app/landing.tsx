@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
+import { SiteNavLinks } from "@/components/site-nav";
 import { TransitionLink } from "@/components/transition-link";
 import { useTheme } from "@/components/theme";
 import { api, formatApy, formatSupply, formatUsd, type HistoryPoint } from "@/lib/api";
@@ -214,13 +215,7 @@ export default function LandingPage() {
       <header className={styles.nav}>
         <div className={styles.navInner}>
           <BrandLogo />
-          <nav className={styles.navLinks}>
-            <a href="#how">How it works</a>
-            <a href="#engines">Strategy</a>
-            <a href="#markets">Markets</a>
-            <a href="#powered">Infrastructure</a>
-            <a href="#compare">Yield</a>
-          </nav>
+          <SiteNavLinks className={styles.navLinks} mode="landing" />
           <div className={styles.navRight}>
             <ThemeToggle />
             <TransitionLink href="/app" className={styles.navCta}>

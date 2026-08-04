@@ -49,7 +49,16 @@ export async function proveSepoliaTx(
 
     const tx = await sourceProvider.getTransaction(sepoliaTxHash);
     const height = tx?.blockNumber ?? blockNumber;
-    await proofBuilder.waitUntilHeightAttested(chainKey, height);
+    try {
+      await proofBuilder.waitUntilHeightAttested(chainKey, height);
+    } catch (err) {
+      return {
+        success: false,
+        chainKey,
+        headerNumber: height,
+        error: err instanceof Error ? err.message : `height ${height} not yet attested`,
+      };
+    }
 
     const result = await proofBuilder.getProof(sepoliaTxHash);
     if (!result.success || !result.data) {
@@ -60,7 +69,10 @@ export async function proveSepoliaTx(
       };
     }
 
-    const prover = new usc.blockProver.PrecompileBlockProver(creditcoinProvider);
+    const prover = new usc.blockProver.PrecompileBlockProver(
+      // usc-sdk pins its own ethers types; runtime JsonRpcProvider is compatible.
+      creditcoinProvider as never,
+    );
     const { headerNumber, txBytes, merkleProof, continuityProof } = result.data;
     const verified = await prover.verifySingle(
       chainKey,

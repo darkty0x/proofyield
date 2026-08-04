@@ -15,7 +15,7 @@ contract ProofYieldVaultFlowTest is Test {
         asset = new MockUSDC();
         asset.mint(alice, 100_000e6);
         vault = new ProofYieldVault(asset);
-        asset.transferOwnership(address(vault));
+        asset.setMinter(address(vault), true);
         vault.setHarvester(address(this));
         vault.setAllowlistedSource(1, true);
     }

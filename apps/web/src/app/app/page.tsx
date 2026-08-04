@@ -4,7 +4,9 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { VaultChart } from "./chart";
 import { WalletButton } from "./wallet-button";
 import { BrandLogo, ThemeToggle } from "@/components/brand-logo";
+import { SiteNavLinks } from "@/components/site-nav";
 import { TransitionLink } from "@/components/transition-link";
+import { useWalletContext } from "@/components/wallet-provider";
 import styles from "./app.module.css";
 import {
   api,
@@ -18,6 +20,12 @@ import {
   type SourceItem,
   type VaultStatus,
 } from "@/lib/api";
+import {
+  depositAssets,
+  fetchUserVaultActivity,
+  redeemShares,
+  type ChainActivity,
+} from "@/lib/vault-tx";
 
 type Tab = "vault" | "portfolio" | "proofs" | "allocator";
 type Action = "deposit" | "withdraw";
@@ -62,6 +70,8 @@ function buildPortfolioActivity(opts: {
   share: string;
   sharePrice: number;
   proofs: ProofItem[];
+  live: boolean;
+  inventDeposit?: boolean;
 }): {
   id: string;
   kind: "deposit" | "withdraw" | "yield";
@@ -72,7 +82,7 @@ function buildPortfolioActivity(opts: {
   at: string;
   href?: string | null;
 }[] {
-  const { myShares, asset, share, sharePrice, proofs } = opts;
+  const { myShares, asset, share, sharePrice, proofs, live, inventDeposit } = opts;
   const rows: {
     id: string;
     kind: "deposit" | "withdraw" | "yield";
@@ -84,7 +94,8 @@ function buildPortfolioActivity(opts: {
     href?: string | null;
   }[] = [];
 
-  if (myShares > 0) {
+  // Only invent a deposit row in demo mode for empty wallets UX.
+  if (!live && inventDeposit !== false && myShares > 0) {
     const deposited = myShares * Math.min(sharePrice, 1.002);
     rows.push({
       id: "pos-deposit",
@@ -251,7 +262,7 @@ export default function VaultAppPage() {
   const [action, setAction] = useState<Action>("deposit");
   const [status, setStatus] = useState<VaultStatus | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
-  const [proofs, setProofs] = useState<ProofItem[]>(TEMPLATE_PROOFS);
+  const [proofs, setProofs] = useState<ProofItem[]>([]);
   const [sources, setSources] = useState<SourceItem[]>([]);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
   const [query, setQuery] = useState("");
@@ -262,25 +273,39 @@ export default function VaultAppPage() {
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [chartMetric, setChartMetric] = useState<"tvl" | "sharePrice">("tvl");
+  const [chainActivity, setChainActivity] = useState<ChainActivity[]>([]);
+  const wallet = useWalletContext();
+  const isLive = Boolean(status?.live);
 
   const refresh = useCallback(async () => {
     try {
       const [s, h, p, src] = await Promise.all([
-        api.status(),
+        api.status(wallet.address ?? undefined),
         api.history(30),
         api.proofs(query, filter === "all" ? "all" : filter),
         api.sources(),
       ]);
       setStatus(s);
       setHistory(h.items);
-      setProofs(p.items.length > 0 ? p.items : TEMPLATE_PROOFS);
+      // Live: never fall back to template proofs. Demo: templates only if empty.
+      if (s.live) {
+        setProofs(p.items);
+      } else {
+        setProofs(p.items.length > 0 ? p.items : TEMPLATE_PROOFS);
+      }
       setSources(src.items);
       setError(null);
+
+      if (s.live && wallet.address && s.vaultAddress) {
+        const rows = await fetchUserVaultActivity(s.vaultAddress, wallet.address, explorers.ctc);
+        setChainActivity(rows);
+      } else {
+        setChainActivity([]);
+      }
     } catch (err) {
-      setProofs(TEMPLATE_PROOFS);
       setError(err instanceof Error ? err.message : "API unreachable");
     }
-  }, [filter, query]);
+  }, [filter, query, wallet.address]);
 
   useEffect(() => {
     void refresh();
@@ -296,7 +321,13 @@ export default function VaultAppPage() {
   const supply = useMemo(() => formatSupply(status?.tokenSupply ?? 0), [status]);
   const share = status?.shareSymbol ?? "pyvUSD";
   const asset = status?.assetSymbol ?? "pyUSD";
-  const myShares = status?.depositorShares ?? 0;
+  // Live: prefer wallet share balance; demo: vault depositorShares snapshot.
+  const myShares =
+    isLive && status?.userShares != null
+      ? status.userShares
+      : isLive
+        ? 0
+        : (status?.depositorShares ?? 0);
   const myValue = myShares * (status?.sharePrice ?? 1);
   const displayProofs = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -328,17 +359,29 @@ export default function VaultAppPage() {
     }));
   }, [history, myShares]);
 
-  const portfolioActivity = useMemo(
-    () =>
-      buildPortfolioActivity({
-        myShares,
-        asset,
-        share,
-        sharePrice: status?.sharePrice ?? 1,
-        proofs,
-      }),
-    [myShares, asset, share, status?.sharePrice, proofs],
-  );
+  const portfolioActivity = useMemo(() => {
+    const fromProofs = buildPortfolioActivity({
+      myShares,
+      asset,
+      share,
+      sharePrice: status?.sharePrice ?? 1,
+      proofs,
+      live: isLive,
+    });
+    const fromChain = chainActivity.map((tx) => ({
+      id: tx.id,
+      kind: tx.kind as "deposit" | "withdraw" | "yield",
+      label: tx.label,
+      detail: tx.detail,
+      amount: tx.amount,
+      tone: tx.tone as "in" | "out" | "flat",
+      at: tx.at,
+      href: tx.href,
+    }));
+    return [...fromChain, ...fromProofs].sort(
+      (a, b) => new Date(b.at).getTime() - new Date(a.at).getTime(),
+    );
+  }, [myShares, asset, share, status?.sharePrice, proofs, isLive, chainActivity]);
 
   const openSource = useMemo(
     () => sources.find((s) => s.sourceId === allocOpenId) ?? null,
@@ -368,11 +411,48 @@ export default function VaultAppPage() {
     e.preventDefault();
     const n = Number(amount);
     if (!(n > 0)) return;
+
+    if (isLive) {
+      void run(async () => {
+        if (!wallet.address) throw new Error("Connect wallet first");
+        if (!wallet.onCc3) {
+          await wallet.switchToCc3();
+          throw new Error("Switch to Creditcoin CC3, then retry");
+        }
+        const vault = status?.vaultAddress;
+        const assetAddr = status?.assetAddress;
+        if (!vault || !assetAddr) throw new Error("Live vault addresses not configured");
+
+        if (action === "deposit") {
+          const { depositTx } = await depositAssets(wallet.address, vault, assetAddr, n);
+          return depositTx;
+        }
+        const shares = n / (status?.sharePrice ?? 1);
+        if (!(shares > 0)) throw new Error("Invalid redeem amount");
+        if (shares > myShares + 1e-9) throw new Error("Insufficient shares");
+        const { redeemTx } = await redeemShares(wallet.address, vault, shares);
+        return redeemTx;
+      }, action === "deposit" ? `Deposited ${formatNumber(n)} ${asset}` : `Withdrew ${formatNumber(n)} ${asset}`);
+      return;
+    }
+
     if (action === "deposit") {
       void run(() => api.deposit(n), `Deposited ${formatNumber(n)} ${asset}`);
     } else {
       void run(() => api.withdraw(n), `Withdrew ${formatNumber(n)} ${asset}`);
     }
+  }
+
+  function onFaucet() {
+    void run(async () => {
+      if (!wallet.address) throw new Error("Connect wallet first");
+      if (!wallet.onCc3) {
+        await wallet.switchToCc3();
+        throw new Error("Switch to Creditcoin CC3, then retry");
+      }
+      const r = await api.faucet(wallet.address);
+      return r;
+    }, "Test pyUSD received");
   }
 
   return (
@@ -382,13 +462,7 @@ export default function VaultAppPage() {
       <header className={styles.topNav}>
         <BrandLogo />
 
-        <nav className={styles.navLinks}>
-          <TransitionLink href="/#how">How it works</TransitionLink>
-          <TransitionLink href="/#engines">Strategy</TransitionLink>
-          <TransitionLink href="/#markets">Markets</TransitionLink>
-          <TransitionLink href="/#compare">Yield</TransitionLink>
-          <TransitionLink href="/#powered">Infrastructure</TransitionLink>
-        </nav>
+        <SiteNavLinks className={styles.navLinks} mode="app" />
 
         <div className={styles.topRight}>
           <ThemeToggle />
@@ -440,7 +514,16 @@ export default function VaultAppPage() {
                       Creditcoin CC3
                     </span>
                     <span className={styles.badge}>Attestcoin</span>
-                    <span className={styles.badgeMuted}>RWA · AI</span>
+                    <span
+                      className={styles.badgeMuted}
+                      data-live={isLive ? "1" : "0"}
+                    >
+                      {isLive
+                        ? "Live"
+                        : status?.mode === "live"
+                          ? "Offline"
+                          : (status?.statusLabel ?? "Demo")}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -536,15 +619,19 @@ export default function VaultAppPage() {
                       View on explorer →
                     </a>
                   ) : (
-                    <p className={styles.muted}>Demo vault · live address after CC3 deploy</p>
+                    <p className={styles.muted}>
+                      {isLive
+                        ? "Live mode · vault address missing — set CREDITCOIN_VAULT"
+                        : "Demo vault · live address after CC3 deploy"}
+                    </p>
                   )}
                 </article>
 
                 <article className={styles.detailCard}>
                   <h3>Strategy</h3>
                   <p>
-                    AI allocator routes coupons from Sepolia RWA desks. NAV only rises after Attestcoin
-                    proves inclusion on Creditcoin — no bridges, no centralized oracles.
+                    Policy allocator routes coupons from Sepolia RWA desks. NAV only rises after
+                    Attestcoin proves inclusion on Creditcoin — no bridges, no centralized oracles.
                   </p>
                   <ul className={styles.strategyList}>
                     <li>
@@ -596,8 +683,8 @@ export default function VaultAppPage() {
                   <img
                     src="/brand/pyvusd-flat.png"
                     alt=""
-                    width={22}
-                    height={22}
+                    width={28}
+                    height={28}
                     className={styles.coinPyvusd}
                   />
                 </div>
@@ -640,27 +727,49 @@ export default function VaultAppPage() {
                 </dl>
 
                 <button className={styles.submit} type="submit" disabled={busy}>
-                  {busy ? "Working…" : action === "deposit" ? `Deposit ${asset}` : `Withdraw ${asset}`}
+                  {busy
+                    ? "Working…"
+                    : isLive && !wallet.connected
+                      ? "Connect wallet to trade"
+                      : action === "deposit"
+                        ? `Deposit ${asset}`
+                        : `Withdraw ${asset}`}
                 </button>
               </form>
 
-              <button
-                className={styles.secondary}
-                type="button"
-                disabled={busy}
-                onClick={() =>
-                  void run(async () => {
-                    const r = await api.harvest({
-                      sourceId: 2,
-                      amount: Math.min(2500, Math.max(100, (status?.tvl ?? 0) * 0.03)),
-                    });
-                    setOpenId(r.id);
-                    setTab("proofs");
-                  }, "Harvest submitted")
-                }
-              >
-                Prove & harvest
-              </button>
+              {isLive ? (
+                <button
+                  className={styles.secondary}
+                  type="button"
+                  disabled={busy || !wallet.connected}
+                  onClick={onFaucet}
+                >
+                  Get test pyUSD
+                </button>
+              ) : (
+                <button
+                  className={styles.secondary}
+                  type="button"
+                  disabled={busy}
+                  onClick={() =>
+                    void run(async () => {
+                      const r = await api.harvest({
+                        sourceId: 2,
+                        amount: Math.min(2500, Math.max(100, (status?.tvl ?? 0) * 0.03)),
+                      });
+                      setOpenId(r.id);
+                      setTab("proofs");
+                    }, "Harvest submitted")
+                  }
+                >
+                  Prove & harvest
+                </button>
+              )}
+              {isLive ? (
+                <p className={styles.tradeLiveHint}>
+                  Live CC3 · coupons harvest via agent after Sepolia Attestcoin proof
+                </p>
+              ) : null}
             </aside>
           </div>
         ) : null}
@@ -885,7 +994,11 @@ export default function VaultAppPage() {
               </div>
 
               {displayProofs.length === 0 ? (
-                <div className={styles.proofsEmpty}>No proofs match this view.</div>
+                <div className={styles.proofsEmpty}>
+                  {isLive
+                    ? "No live proofs yet — post a Sepolia coupon and wait for Attestcoin."
+                    : "No proofs match this view."}
+                </div>
               ) : (
                 displayProofs.map((p) => {
                   const open = openId === p.id;
@@ -995,7 +1108,7 @@ export default function VaultAppPage() {
               <div>
                 <h1 className={styles.allocTitle}>Allocator</h1>
                 <p className={styles.allocLead}>
-                  AI target weights across RWA desks. Open a source for details.
+                  Policy target weights across RWA desks. Open a source for details.
                 </p>
               </div>
             </header>
@@ -1072,8 +1185,8 @@ export default function VaultAppPage() {
                     <div className={styles.allocDetailEyebrow}>SRC {openSource.sourceId}</div>
                     <h2 className={styles.allocDetailTitle}>{openSource.name}</h2>
                     <p className={styles.allocDetailLead}>
-                      Target sleeve in the AI allocator. Weights are policy outputs — not
-                      editable from this desk.
+                      Policy target sleeve for beta. Weights are static desk targets — not
+                      live AI decisions.
                     </p>
                   </div>
                   <button

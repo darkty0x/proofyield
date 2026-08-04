@@ -1,0 +1,20 @@
+{
+  "network": "testnet",
+  "updatedAt": "2026-08-04T00:08:32.992Z",
+  "sepolia": {
+    "chainId": 11155111,
+    "explorer": "https://sepolia.etherscan.io",
+    "rwaSource": "0x9c431d95619aBd5A680F8D6DE4A2BDD4c070bCcB"
+  },
+  "creditcoin": {
+    "chainId": 102031,
+    "explorer": "https://creditcoin-testnet.blockscout.com",
+    "rpc": "https://rpc.cc3-testnet.creditcoin.network",
+    "asset": null,
+    "vault": null,
+    "assetSymbol": "pyUSD",
+    "shareSymbol": "pyvUSD",
+    "assetDecimals": 6
+  },
+  "notes": "Fill via node scripts/deploy-cc3.mjs (or write-deployments.mjs). Never commit private keys. Sepolia source deployed 2026-08-04."
+}

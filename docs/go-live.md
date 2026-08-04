@@ -1,8 +1,12 @@
 # Go-live checklist
 
+See also [beta-checklist.md](./beta-checklist.md) for the full wallet E2E.
+
 ## 1. Keys & RPCs
 
 Copy `.env.example` → `.env`. Fund deployer/harvester on Sepolia + Creditcoin CC3 testnet. Never commit secrets.
+
+Set `PROOFYIELD_MODE=live`.
 
 ## 2. Deploy Sepolia source
 
@@ -18,15 +22,24 @@ Record `RwaYieldSource` → `SEPOLIA_RWA_SOURCE`.
 
 ## 3. Deploy Creditcoin vault
 
+Foundry `forge script` currently fails CC3 header validation (`prevrandao`). Use the ethers deployer instead.
+
+Fund the deployer with tCTC first (Discord `#token-faucet`):
+
+```text
+/faucet address:0xYOUR_DEPLOYER
+```
+
+Then:
+
 ```bash
 export CREDITCOIN_RPC_URL=https://rpc.cc3-testnet.creditcoin.network
 export SEPOLIA_RWA_SOURCE=0x...
 export HARVESTER_ADDRESS=0x...   # agent wallet
-forge script script/Deploy.s.sol:DeployCreditcoinStack \
-  --rpc-url $CREDITCOIN_RPC_URL --broadcast -vvvv
+node scripts/deploy-cc3.mjs
 ```
 
-Record `MockUSDC` → `CREDITCOIN_ASSET`, `ProofYieldVault` → `CREDITCOIN_VAULT`.
+This deploys `MockUSDC` + `ProofYieldVault`, seeds faucet inventory, sets minters, and writes `deployments/testnet.json`.
 
 ## 4. Agent live
 
@@ -35,6 +48,7 @@ PROOFYIELD_MODE=live
 HARVESTER_PRIVATE_KEY=...
 SEPOLIA_RWA_SOURCE=...
 CREDITCOIN_VAULT=...
+CREDITCOIN_ASSET=...
 npm run start -w @proofyield/agent
 ```
 
@@ -53,7 +67,7 @@ NEXT_PUBLIC_API_URL=https://your-api.up.railway.app
 npm run build -w @proofyield/web && npm run start -w @proofyield/web
 ```
 
-Confirm UI badge shows **Live**.
+Confirm UI badge shows **Live**. Use **Get test pyUSD** then wallet **Deposit** / **Withdraw** (not demo API).
 
 ## 6. Proof artifacts for submission
 

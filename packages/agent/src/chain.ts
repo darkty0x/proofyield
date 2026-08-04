@@ -12,6 +12,9 @@ export const RWA_ABI = [
 export const VAULT_ABI = [
   "function deposit(uint256 assets, address receiver) returns (uint256)",
   "function redeem(uint256 shares, address receiver, address owner) returns (uint256)",
+  "function withdraw(uint256 assets, address receiver, address owner) returns (uint256)",
+  "function previewDeposit(uint256 assets) view returns (uint256)",
+  "function previewRedeem(uint256 shares) view returns (uint256)",
   "function totalAssets() view returns (uint256)",
   "function totalSupply() view returns (uint256)",
   "function sharePrice() view returns (uint256)",
@@ -22,14 +25,18 @@ export const VAULT_ABI = [
   "function execute(uint8 action, uint64 chainKey, uint64 blockHeight, bytes encodedTransaction, bytes32 merkleRoot, (bytes32 hash, bool isLeft)[] siblings, bytes32 lowerEndpointDigest, bytes32[] continuityRoots) returns (bool)",
   "function balanceOf(address) view returns (uint256)",
   "function asset() view returns (address)",
+  "event Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares)",
+  "event Withdraw(address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares)",
 ];
 
 export const ERC20_ABI = [
   "function approve(address spender, uint256 amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
   "function balanceOf(address) view returns (uint256)",
   "function decimals() view returns (uint8)",
   "function mint(address to, uint256 amount)",
   "function symbol() view returns (string)",
+  "function transfer(address to, uint256 amount) returns (bool)",
 ];
 
 const couponIface = new Interface(RWA_ABI);
