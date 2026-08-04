@@ -32,6 +32,11 @@ function resolveHarvestTx(sepoliaTxHash: string, existing?: string | null): stri
   return isTxHash(known) ? known : undefined;
 }
 
+function isInternalCouponMeta(meta?: string): boolean {
+  if (!meta?.trim()) return true;
+  return /^(beta[-_]?|demo[-_]?|test[-_]?|cli[-_]?)/i.test(meta.trim());
+}
+
 export class HarvestWorker {
   private lastBlock = 0;
   private timer?: NodeJS.Timeout;
@@ -73,7 +78,7 @@ export class HarvestWorker {
         this.policy.sources.find((s) => s.sourceId === p.coupon.sourceId)?.name ??
         `Source ${p.coupon.sourceId}`;
       const meta = (p.coupon.metadata ?? "").trim();
-      if (/^(beta[-_]?|demo[-_]?|test[-_]?|cli[-_]?)/i.test(meta) || !meta) {
+      if (isInternalCouponMeta(meta)) {
         p.coupon.metadata = `${desk} · CouponPaid`;
         changed = true;
       }
@@ -89,6 +94,14 @@ export class HarvestWorker {
       }
     }
     if (changed) this.store.save();
+  }
+
+  private humanCouponMeta(coupon: CouponEvent): string {
+    if (!isInternalCouponMeta(coupon.metadata)) return coupon.metadata;
+    const desk =
+      this.policy.sources.find((s) => s.sourceId === coupon.sourceId)?.name ??
+      `Source ${coupon.sourceId}`;
+    return `${desk} · CouponPaid`;
   }
 
   /** Keep display APY = promised; TVL from deposits; supply from env/demo mint. */
@@ -209,6 +222,7 @@ export class HarvestWorker {
       await this.pollLiveCoupons();
       await this.retryOpenProofs();
       await this.refreshLiveVault();
+      this.repairProofRecords();
     } catch (err) {
       this.audit.push("error", err instanceof Error ? err.message : String(err));
     }
@@ -248,12 +262,28 @@ export class HarvestWorker {
   }
 
   async processCoupon(coupon: CouponEvent): Promise<ProofRecord> {
+    coupon = { ...coupon, metadata: this.humanCouponMeta(coupon) };
     const existing = this.store.proofs.find(
       (p) =>
         p.coupon.sepoliaTxHash === coupon.sepoliaTxHash &&
         p.coupon.couponId === coupon.couponId,
     );
-    if (existing?.status === "harvested") return existing;
+    if (existing?.status === "harvested") {
+      let touched = false;
+      if (isInternalCouponMeta(existing.coupon.metadata)) {
+        existing.coupon.metadata = coupon.metadata;
+        touched = true;
+      }
+      if (existing.harvest) {
+        const fixed = resolveHarvestTx(coupon.sepoliaTxHash, existing.harvest.ctcTxHash);
+        if (fixed && fixed !== existing.harvest.ctcTxHash) {
+          existing.harvest.ctcTxHash = fixed;
+          touched = true;
+        }
+      }
+      if (touched) this.store.upsertProof(existing);
+      return existing;
+    }
     if (existing?.status === "rejected" && existing.decision?.action === "reject") return existing;
 
     let record: ProofRecord = existing ?? {
